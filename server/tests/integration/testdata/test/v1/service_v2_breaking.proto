@@ -1,0 +1,14 @@
+syntax = "proto3";
+package test.v1;
+
+service TestService {
+  rpc CreateItem (CreateItemRequest) returns (CreateItemResponse);
+}
+
+message CreateItemRequest {
+  string name = 1;
+}
+
+message CreateItemResponse {
+  string id = 1;
+}

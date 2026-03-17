@@ -1,0 +1,67 @@
+### Publish Protocol
+GRPC localhost:50051/registry.v1.ProtocolRegistry/PublishProtocol
+Content-Type: application/json
+
+{
+  "service_name": "my-service",
+  "protocol_type": 1,
+  "files": [
+    {
+      "path": "service.proto",
+      "content": "c3ludGF4ID0gInByb3RvMyI7CnBhY2thZ2UgbXlzZXJ2aWNlLnYxOwoKc2VydmljZSBNeVNlcnZpY2UgewogIHJwYyBHZXRJdGVtIChHZXRJdGVtUmVxdWVzdCkgcmV0dXJucyAoR2V0SXRlbVJlc3BvbnNlKTsKfQoKbWVzc2FnZSBHZXRJdGVtUmVxdWVzdCB7CiAgc3RyaW5nIGlkID0gMTsKfQoKbWVzc2FnZSBHZXRJdGVtUmVzcG9uc2UgewogIHN0cmluZyBpZCA9IDE7CiAgc3RyaW5nIG5hbWUgPSAyOwogIGludDMyIHByaWNlID0gMzsKfQo="
+    }
+  ],
+  "entry_point": "service.proto"
+}
+
+### Get Protocol
+GRPC localhost:50051/registry.v1.ProtocolRegistry/GetProtocol
+Content-Type: application/json
+
+{
+  "service_name": "my-service",
+  "protocol_type": 1
+}
+
+### Register Consumer
+GRPC localhost:50051/registry.v1.ProtocolRegistry/RegisterConsumer
+Content-Type: application/json
+
+{
+  "consumer_name": "my-consumer",
+  "server_name": "my-service",
+  "protocol_type": 1,
+  "files": [
+    {
+      "path": "service.proto",
+      "content": "c3ludGF4ID0gInByb3RvMyI7CnBhY2thZ2UgbXlzZXJ2aWNlLnYxOwoKc2VydmljZSBNeVNlcnZpY2UgewogIHJwYyBHZXRJdGVtIChHZXRJdGVtUmVxdWVzdCkgcmV0dXJucyAoR2V0SXRlbVJlc3BvbnNlKTsKfQoKbWVzc2FnZSBHZXRJdGVtUmVxdWVzdCB7CiAgc3RyaW5nIGhlbGxvID0gMTsKfQoKbWVzc2FnZSBHZXRJdGVtUmVzcG9uc2UgewogIHN0cmluZyBpZCA9IDE7CiAgc3RyaW5nIG5hbWUgPSAyOwogIGludDMyIHByaWNlID0gMzsKfQo="
+    }
+  ],
+  "entry_point": "service.proto"
+}
+
+### Unregister Consumer
+GRPC localhost:50051/registry.v1.ProtocolRegistry/UnregisterConsumer
+Content-Type: application/json
+
+{
+  "consumer_name": "my-consumer",
+  "server_name": "my-service",
+  "protocol_type": 1
+}
+
+### Get gRPC View
+GRPC localhost:50051/registry.v1.ProtocolRegistry/GetGrpcView
+Content-Type: application/json
+
+{
+  "service_name": "my-service"
+}
+
+### List services
+GRPC localhost:50051/registry.v1.ProtocolRegistry/ListServices
+Content-Type: application/json
+
+{
+  
+}

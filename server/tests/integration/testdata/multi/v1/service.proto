@@ -1,0 +1,12 @@
+syntax = "proto3";
+package multi.v1;
+
+import "multi/v1/types.proto";
+
+service ItemService {
+  rpc GetItem (GetItemRequest) returns (Item);
+}
+
+message GetItemRequest {
+  string id = 1;
+}

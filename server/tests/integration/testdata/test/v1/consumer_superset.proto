@@ -1,0 +1,22 @@
+syntax = "proto3";
+package test.v1;
+
+service TestService {
+  rpc GetItem (GetItemRequest) returns (GetItemResponse);
+  rpc DeleteItem (DeleteItemRequest) returns (DeleteItemResponse);
+}
+
+message GetItemRequest {
+  string id = 1;
+}
+
+message GetItemResponse {
+  string id = 1;
+  string name = 2;
+}
+
+message DeleteItemRequest {
+  string id = 1;
+}
+
+message DeleteItemResponse {}

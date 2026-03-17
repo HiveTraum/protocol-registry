@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package registry.v1;
+
+option go_package = "registry/v1;registryv1";
+
+service ProtocolRegistry {
+  // Publish a protocol for a service
+  rpc PublishProtocol(PublishProtocolRequest) returns (PublishProtocolResponse);
+
+  // Get the current protocol for a service
+  rpc GetProtocol(GetProtocolRequest) returns (GetProtocolResponse);
+
+  // Register a consumer of a service's protocol
+  rpc RegisterConsumer(RegisterConsumerRequest) returns (RegisterConsumerResponse);
+
+  // Unregister a consumer of a service's protocol
+  rpc UnregisterConsumer(UnregisterConsumerRequest) returns (UnregisterConsumerResponse);
+
+  // Get a gRPC view of a service's API with consumer usage
+  rpc GetGrpcView(GetGrpcViewRequest) returns (GetGrpcViewResponse);
+
+  // List all registered services
+  rpc ListServices(ListServicesRequest) returns (ListServicesResponse);
+}
+
+enum ProtocolType {
+  PROTOCOL_TYPE_UNSPECIFIED = 0;
+  PROTOCOL_TYPE_GRPC = 1;
+  // Future: PROTOCOL_TYPE_OPENAPI = 2;
+  // Future: PROTOCOL_TYPE_ASYNCAPI = 3;
+}
+
+message ProtoFile {
+  string path = 1;
+  bytes content = 2;
+}
+
+message PublishProtocolRequest {
+  string service_name = 1;
+  reserved 2;
+  ProtocolType protocol_type = 3;
+  repeated ProtoFile files = 4;
+  string entry_point = 5;
+}
+
+message PublishProtocolResponse {
+  string service_name = 1;
+  bool is_new = 2;
+}
+
+message GetProtocolRequest {
+  string service_name = 1;
+  ProtocolType protocol_type = 2;
+}
+
+message GetProtocolResponse {
+  string service_name = 1;
+  ProtocolType protocol_type = 2;
+  reserved 3;
+  repeated ProtoFile files = 4;
+  string entry_point = 5;
+}
+
+message RegisterConsumerRequest {
+  string consumer_name = 1;
+  string server_name = 2;
+  ProtocolType protocol_type = 3;
+  reserved 4;
+  repeated ProtoFile files = 5;
+  string entry_point = 6;
+}
+
+message RegisterConsumerResponse {
+  string consumer_name = 1;
+  string server_name = 2;
+  bool is_new = 3;
+}
+
+message UnregisterConsumerRequest {
+  string consumer_name = 1;
+  string server_name = 2;
+  ProtocolType protocol_type = 3;
+}
+
+message UnregisterConsumerResponse {}
+
+message GetGrpcViewRequest {
+  string service_name = 1;
+}
+
+message GetGrpcViewResponse {
+  string service_name = 1;
+  repeated GrpcServiceView services = 2;
+}
+
+message GrpcServiceView {
+  string name = 1;
+  repeated GrpcMethodView methods = 2;
+}
+
+message GrpcMethodView {
+  string name = 1;
+  GrpcMessageView input = 2;
+  GrpcMessageView output = 3;
+  repeated string consumers = 4;
+}
+
+message GrpcMessageView {
+  string name = 1;
+  repeated GrpcFieldView fields = 2;
+}
+
+message GrpcFieldView {
+  string name = 1;
+  string type = 2;
+  uint32 number = 3;
+  repeated string consumers = 4;
+}
+
+message ListServicesRequest {}
+
+message ListServicesResponse {
+  repeated ServiceInfo services = 1;
+}
+
+message ServiceInfo {
+  string id = 1;
+  string name = 2;
+}

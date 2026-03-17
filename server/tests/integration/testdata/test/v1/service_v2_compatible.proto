@@ -1,0 +1,22 @@
+syntax = "proto3";
+package test.v1;
+
+service TestService {
+  rpc GetItem (GetItemRequest) returns (GetItemResponse);
+  rpc ListItems (ListItemsRequest) returns (ListItemsResponse);
+}
+
+message GetItemRequest {
+  string id = 1;
+}
+
+message GetItemResponse {
+  string id = 1;
+  string name = 2;
+}
+
+message ListItemsRequest {}
+
+message ListItemsResponse {
+  repeated GetItemResponse items = 1;
+}
