@@ -274,7 +274,7 @@ Migrations are embedded into the binary via `go:embed`. You can also run them di
 
 ## Roadmap
 
-- [ ] Protocol version history and listing
+- [x] Protocol version history and listing
 - [ ] Protocol dependency graph — visual map of which consumers use which methods/fields
 - [ ] OpenAPI and AsyncAPI support
 - [ ] Web UI for browsing registered protocols
