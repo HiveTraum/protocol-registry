@@ -30,6 +30,7 @@ import (
 	"github.com/user/protocol_registry/internal/migrations"
 	"github.com/user/protocol_registry/internal/usecases/get_grpc_view"
 	"github.com/user/protocol_registry/internal/usecases/get_protocol"
+	"github.com/user/protocol_registry/internal/usecases/list_protocol_versions"
 	"github.com/user/protocol_registry/internal/usecases/list_services"
 	"github.com/user/protocol_registry/internal/usecases/publish_protocol"
 	"github.com/user/protocol_registry/internal/usecases/register_consumer"
@@ -130,8 +131,9 @@ func TestMain(m *testing.M) {
 	unregisterUC := unregister_consumer.New(serviceRepo, consumerRepo, protocolStorage)
 	grpcViewUC := get_grpc_view.New(serviceRepo, protocolRepo, protocolStorage, consumerRepo, protocolStorage, protoInspector)
 	listServicesUC := list_services.New(serviceRepo)
+	listVersionsUC := list_protocol_versions.New(serviceRepo, protocolRepo)
 
-	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC)
+	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC, listVersionsUC)
 
 	srv = grpc.NewServer()
 	registryv1.RegisterProtocolRegistryServer(srv, handler)
@@ -748,4 +750,132 @@ func TestGetGrpcViewNotFound(t *testing.T) {
 	})
 	r.Error(err)
 	r.Equal(codes.NotFound, status.Code(err))
+}
+
+func TestListProtocolVersions(t *testing.T) {
+	ctx := context.Background()
+	resetState(ctx, t)
+	r := require.New(t)
+
+	v1Content := readTestdata(t, "test/v1/service.proto")
+	v2Content := readTestdata(t, "test/v1/service_v2_compatible.proto")
+
+	// Publish v1 → version 1 exists
+	publishProto(t, ctx, "versioned-service", "test/v1/service.proto", v1Content)
+
+	resp1, err := client.ListProtocolVersions(ctx, &registryv1.ListProtocolVersionsRequest{
+		ServiceName:  "versioned-service",
+		ProtocolType: registryv1.ProtocolType_PROTOCOL_TYPE_GRPC,
+	})
+	r.NoError(err)
+	r.Equal("versioned-service", resp1.ServiceName)
+	r.Equal(int32(1), resp1.Total)
+	r.Len(resp1.Versions, 1)
+	r.Equal(int32(1), resp1.Versions[0].VersionNumber)
+	r.Equal(int32(1), resp1.Versions[0].FileCount)
+	r.NotEmpty(resp1.Versions[0].ContentHash)
+	r.NotEmpty(resp1.Versions[0].PublishedAt)
+
+	// Publish v2 (compatible) → version 2 added; ordered DESC so v2 first
+	pubResp, err := client.PublishProtocol(ctx, &registryv1.PublishProtocolRequest{
+		ServiceName:  "versioned-service",
+		ProtocolType: registryv1.ProtocolType_PROTOCOL_TYPE_GRPC,
+		Files:        []*registryv1.ProtoFile{{Path: "test/v1/service.proto", Content: v2Content}},
+		EntryPoint:   "test/v1/service.proto",
+	})
+	r.NoError(err)
+	r.False(pubResp.IsNew)
+
+	resp2, err := client.ListProtocolVersions(ctx, &registryv1.ListProtocolVersionsRequest{
+		ServiceName:  "versioned-service",
+		ProtocolType: registryv1.ProtocolType_PROTOCOL_TYPE_GRPC,
+	})
+	r.NoError(err)
+	r.Equal(int32(2), resp2.Total)
+	r.Len(resp2.Versions, 2)
+	// Versions are returned newest first (ORDER BY version_number DESC)
+	r.Equal(int32(2), resp2.Versions[0].VersionNumber)
+	r.Equal(int32(1), resp2.Versions[1].VersionNumber)
+	// Content hashes differ between versions
+	r.NotEqual(resp2.Versions[0].ContentHash, resp2.Versions[1].ContentHash)
+}
+
+func TestListServices(t *testing.T) {
+	ctx := context.Background()
+	resetState(ctx, t)
+	r := require.New(t)
+
+	protoContent := readTestdata(t, "test/v1/service.proto")
+
+	// No services yet
+	resp0, err := client.ListServices(ctx, &registryv1.ListServicesRequest{})
+	r.NoError(err)
+	r.Empty(resp0.Services)
+
+	// Publish two services
+	publishProto(t, ctx, "alpha-service", "test/v1/service.proto", protoContent)
+	publishProto(t, ctx, "beta-service", "test/v1/service.proto", protoContent)
+
+	resp, err := client.ListServices(ctx, &registryv1.ListServicesRequest{})
+	r.NoError(err)
+	r.Len(resp.Services, 2)
+
+	names := make([]string, len(resp.Services))
+	for i, svc := range resp.Services {
+		names[i] = svc.Name
+		r.NotEmpty(svc.Id)
+	}
+	r.ElementsMatch([]string{"alpha-service", "beta-service"}, names)
+}
+
+func TestMultiFileConsumerBreakingChange(t *testing.T) {
+	ctx := context.Background()
+	resetState(ctx, t)
+	r := require.New(t)
+
+	serviceContent := readTestdata(t, "multi/v1/service.proto")
+	typesContent := readTestdata(t, "multi/v1/types.proto")
+	breakingContent := readTestdata(t, "multi/v1/service_v2_breaking.proto")
+
+	// Publish multi-file v1 (ItemService with GetItem importing types.proto)
+	pubResp, err := client.PublishProtocol(ctx, &registryv1.PublishProtocolRequest{
+		ServiceName:  "item-service",
+		ProtocolType: registryv1.ProtocolType_PROTOCOL_TYPE_GRPC,
+		Files: []*registryv1.ProtoFile{
+			{Path: "multi/v1/service.proto", Content: serviceContent},
+			{Path: "multi/v1/types.proto", Content: typesContent},
+		},
+		EntryPoint: "multi/v1/service.proto",
+	})
+	r.NoError(err)
+	r.True(pubResp.IsNew)
+
+	// Register a consumer using the same multi-file proto (full subset)
+	regResp, err := client.RegisterConsumer(ctx, &registryv1.RegisterConsumerRequest{
+		ConsumerName: "item-consumer",
+		ServerName:   "item-service",
+		ProtocolType: registryv1.ProtocolType_PROTOCOL_TYPE_GRPC,
+		Files: []*registryv1.ProtoFile{
+			{Path: "multi/v1/service.proto", Content: serviceContent},
+			{Path: "multi/v1/types.proto", Content: typesContent},
+		},
+		EntryPoint: "multi/v1/service.proto",
+	})
+	r.NoError(err)
+	r.True(regResp.IsNew)
+	r.Equal("item-consumer", regResp.ConsumerName)
+	r.Equal("item-service", regResp.ServerName)
+
+	// Publish breaking v2 (replaces GetItem with DeleteItem) → blocked by consumer
+	_, err = client.PublishProtocol(ctx, &registryv1.PublishProtocolRequest{
+		ServiceName:  "item-service",
+		ProtocolType: registryv1.ProtocolType_PROTOCOL_TYPE_GRPC,
+		Files: []*registryv1.ProtoFile{
+			{Path: "multi/v1/service.proto", Content: breakingContent},
+			{Path: "multi/v1/types.proto", Content: typesContent},
+		},
+		EntryPoint: "multi/v1/service.proto",
+	})
+	r.Error(err)
+	r.Equal(codes.FailedPrecondition, status.Code(err))
 }
