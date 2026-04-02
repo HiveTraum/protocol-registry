@@ -29,9 +29,9 @@ type ConsumerStorage interface {
 }
 
 type SyntaxValidator interface {
-	Validate(fileSet entities.ProtoFileSet) error
+	Validate(protocolType entities.ProtocolType, fileSet entities.ProtoFileSet) error
 }
 
 type BreakingChangesValidator interface {
-	Validate(ctx context.Context, previous, current entities.ProtoFileSet) error
+	Validate(ctx context.Context, protocolType entities.ProtocolType, previous, current entities.ProtoFileSet) error
 }

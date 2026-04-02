@@ -26,6 +26,7 @@ type ProtocolType int32
 const (
 	ProtocolType_PROTOCOL_TYPE_UNSPECIFIED ProtocolType = 0
 	ProtocolType_PROTOCOL_TYPE_GRPC        ProtocolType = 1
+	ProtocolType_PROTOCOL_TYPE_OPENAPI     ProtocolType = 2 // Future: PROTOCOL_TYPE_ASYNCAPI = 3;
 )
 
 // Enum value maps for ProtocolType.
@@ -33,10 +34,12 @@ var (
 	ProtocolType_name = map[int32]string{
 		0: "PROTOCOL_TYPE_UNSPECIFIED",
 		1: "PROTOCOL_TYPE_GRPC",
+		2: "PROTOCOL_TYPE_OPENAPI",
 	}
 	ProtocolType_value = map[string]int32{
 		"PROTOCOL_TYPE_UNSPECIFIED": 0,
 		"PROTOCOL_TYPE_GRPC":        1,
+		"PROTOCOL_TYPE_OPENAPI":     2,
 	}
 )
 
@@ -1350,10 +1353,11 @@ const file_registry_v1_registry_proto_rawDesc = "" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12>\n" +
 	"\rprotocol_type\x18\x02 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12<\n" +
 	"\bversions\x18\x03 \x03(\v2 .registry.v1.ProtocolVersionInfoR\bversions\x12\x14\n" +
-	"\x05total\x18\x04 \x01(\x05R\x05total*E\n" +
+	"\x05total\x18\x04 \x01(\x05R\x05total*`\n" +
 	"\fProtocolType\x12\x1d\n" +
 	"\x19PROTOCOL_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12PROTOCOL_TYPE_GRPC\x10\x012\x9e\x05\n" +
+	"\x12PROTOCOL_TYPE_GRPC\x10\x01\x12\x19\n" +
+	"\x15PROTOCOL_TYPE_OPENAPI\x10\x022\x9e\x05\n" +
 	"\x10ProtocolRegistry\x12\\\n" +
 	"\x0fPublishProtocol\x12#.registry.v1.PublishProtocolRequest\x1a$.registry.v1.PublishProtocolResponse\x12P\n" +
 	"\vGetProtocol\x12\x1f.registry.v1.GetProtocolRequest\x1a .registry.v1.GetProtocolResponse\x12_\n" +

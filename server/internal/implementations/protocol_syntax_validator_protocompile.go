@@ -14,7 +14,7 @@ func NewProtocolSyntaxValidatorProtocompile() *ProtocolSyntaxValidatorProtocompi
 	return &ProtocolSyntaxValidatorProtocompile{}
 }
 
-func (v *ProtocolSyntaxValidatorProtocompile) Validate(fileSet entities.ProtoFileSet) error {
+func (v *ProtocolSyntaxValidatorProtocompile) Validate(_ entities.ProtocolType, fileSet entities.ProtoFileSet) error {
 	var errs []string
 	rep := reporter.NewReporter(
 		func(err reporter.ErrorWithPos) error {

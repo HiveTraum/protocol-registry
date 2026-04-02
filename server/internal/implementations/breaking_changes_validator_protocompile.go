@@ -17,7 +17,7 @@ func NewBreakingChangesValidatorProtocompile() *BreakingChangesValidatorProtocom
 	return &BreakingChangesValidatorProtocompile{}
 }
 
-func (v *BreakingChangesValidatorProtocompile) Validate(ctx context.Context, previous, current entities.ProtoFileSet) error {
+func (v *BreakingChangesValidatorProtocompile) Validate(ctx context.Context, _ entities.ProtocolType, previous, current entities.ProtoFileSet) error {
 	prevFile, err := v.compile(ctx, previous)
 	if err != nil {
 		return fmt.Errorf("compile previous: %w", err)

@@ -40,7 +40,7 @@ func New(
 }
 
 func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
-	if err := uc.syntaxValidator.Validate(input.FileSet); err != nil {
+	if err := uc.syntaxValidator.Validate(input.ProtocolType, input.FileSet); err != nil {
 		return nil, fmt.Errorf("syntax validation failed: %w", err)
 	}
 
@@ -109,7 +109,7 @@ func (uc *UseCase) validateAgainstConsumers(ctx context.Context, serverServiceID
 			return fmt.Errorf("download consumer proto for %q: %w", consumerSvc.Name, err)
 		}
 
-		if err := uc.breakingChangesValidator.Validate(ctx, consumerFileSet, newFileSet); err != nil {
+		if err := uc.breakingChangesValidator.Validate(ctx, protocolType, consumerFileSet, newFileSet); err != nil {
 			var domainErr *entities.DomainError
 			if errors.As(err, &domainErr) && domainErr.Code == entities.ErrorCodeBreakingChanges {
 				violations = append(violations, entities.ConsumerBreakingChange{

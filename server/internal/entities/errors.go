@@ -71,6 +71,15 @@ const (
 	BreakingChangeMethodInputChanged      BreakingChangeType = "METHOD_INPUT_CHANGED"
 	BreakingChangeMethodOutputChanged     BreakingChangeType = "METHOD_OUTPUT_CHANGED"
 	BreakingChangeMethodStreamingChanged  BreakingChangeType = "METHOD_STREAMING_CHANGED"
+
+	// OpenAPI breaking change types
+	BreakingChangeEndpointRemoved        BreakingChangeType = "ENDPOINT_REMOVED"
+	BreakingChangeHTTPMethodRemoved      BreakingChangeType = "HTTP_METHOD_REMOVED"
+	BreakingChangePathParameterRemoved   BreakingChangeType = "PATH_PARAMETER_REMOVED"
+	BreakingChangeRequestFieldRemoved    BreakingChangeType = "REQUEST_FIELD_REMOVED"
+	BreakingChangeRequestFieldTypeChanged BreakingChangeType = "REQUEST_FIELD_TYPE_CHANGED"
+	BreakingChangeResponseFieldRemoved   BreakingChangeType = "RESPONSE_FIELD_REMOVED"
+	BreakingChangeResponseFieldTypeChanged BreakingChangeType = "RESPONSE_FIELD_TYPE_CHANGED"
 )
 
 // NewBreakingChangesError creates a domain error for breaking changes

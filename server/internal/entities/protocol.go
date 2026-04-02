@@ -11,12 +11,15 @@ type ProtocolType int16
 const (
 	ProtocolTypeUnspecified ProtocolType = 0
 	ProtocolTypeGRPC        ProtocolType = 1
+	ProtocolTypeOpenAPI     ProtocolType = 2
 )
 
 func (t ProtocolType) String() string {
 	switch t {
 	case ProtocolTypeGRPC:
 		return "grpc"
+	case ProtocolTypeOpenAPI:
+		return "openapi"
 	default:
 		return "unknown"
 	}

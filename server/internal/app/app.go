@@ -90,8 +90,14 @@ func (a *App) Run(ctx context.Context) error {
 	consumerRepo := implementations.NewConsumerRepositoryPostgres(pool)
 	apiKeyRepo := implementations.NewAPIKeyRepositoryPostgres(pool)
 	protocolStorage := implementations.NewProtocolStorageS3(s3Client, a.cfg.S3Bucket)
-	syntaxValidator := implementations.NewProtocolSyntaxValidatorProtocompile()
-	breakingChangesValidator := implementations.NewBreakingChangesValidatorProtocompile()
+	protoSyntaxValidator := implementations.NewProtocolSyntaxValidatorProtocompile()
+	openapiSyntaxValidator := implementations.NewOpenAPISyntaxValidator()
+	syntaxValidator := implementations.NewDispatchingSyntaxValidator(protoSyntaxValidator, openapiSyntaxValidator)
+
+	protoBreakingChangesValidator := implementations.NewBreakingChangesValidatorProtocompile()
+	openapiBreakingChangesValidator := implementations.NewBreakingChangesValidatorOpenAPI()
+	breakingChangesValidator := implementations.NewDispatchingBreakingChangesValidator(protoBreakingChangesValidator, openapiBreakingChangesValidator)
+
 	protoInspector := implementations.NewProtoInspectorProtocompile()
 
 	// Use cases

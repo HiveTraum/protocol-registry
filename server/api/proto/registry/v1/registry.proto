@@ -30,7 +30,7 @@ service ProtocolRegistry {
 enum ProtocolType {
   PROTOCOL_TYPE_UNSPECIFIED = 0;
   PROTOCOL_TYPE_GRPC = 1;
-  // Future: PROTOCOL_TYPE_OPENAPI = 2;
+  PROTOCOL_TYPE_OPENAPI = 2;
   // Future: PROTOCOL_TYPE_ASYNCAPI = 3;
 }
 

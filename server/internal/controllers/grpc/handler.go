@@ -440,6 +440,8 @@ func protoTypeToEntity(pt registryv1.ProtocolType) entities.ProtocolType {
 	switch pt {
 	case registryv1.ProtocolType_PROTOCOL_TYPE_GRPC:
 		return entities.ProtocolTypeGRPC
+	case registryv1.ProtocolType_PROTOCOL_TYPE_OPENAPI:
+		return entities.ProtocolTypeOpenAPI
 	default:
 		return entities.ProtocolTypeUnspecified
 	}

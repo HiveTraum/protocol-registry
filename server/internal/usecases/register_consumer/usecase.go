@@ -38,7 +38,7 @@ func New(
 }
 
 func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
-	if err := uc.syntaxValidator.Validate(input.FileSet); err != nil {
+	if err := uc.syntaxValidator.Validate(input.ProtocolType, input.FileSet); err != nil {
 		return nil, fmt.Errorf("syntax validation failed: %w", err)
 	}
 
@@ -63,7 +63,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("download server protocol: %w", err)
 	}
 
-	if err := uc.breakingChangesValidator.Validate(ctx, input.FileSet, serverFileSet); err != nil {
+	if err := uc.breakingChangesValidator.Validate(ctx, input.ProtocolType, input.FileSet, serverFileSet); err != nil {
 		return nil, fmt.Errorf("consumer proto is not a subset of server proto: %w", err)
 	}
 
