@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -51,7 +51,8 @@ func main() {
 	}
 
 	if err := cliApp.Run(os.Args); err != nil {
-		log.Fatal(err)
+		slog.Error("fatal error", "error", err)
+		os.Exit(1)
 	}
 }
 
@@ -71,7 +72,7 @@ func runServe() error {
 
 	go func() {
 		<-sigCh
-		log.Println("Shutting down...")
+		slog.Info("received shutdown signal")
 		application.Shutdown()
 		cancel()
 	}()
@@ -97,6 +98,6 @@ func runMigrateUp() error {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
-	log.Println("Migrations applied successfully")
+	slog.Info("migrations applied successfully")
 	return nil
 }

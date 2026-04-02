@@ -9,6 +9,8 @@ import (
 
 type Config struct {
 	GRPCPort    int    `envconfig:"GRPC_PORT" default:"50051"`
+	HTTPPort    int    `envconfig:"HTTP_PORT" default:"8080"`
+	LogLevel    string `envconfig:"LOG_LEVEL" default:"info"`
 	PostgresDSN string `envconfig:"POSTGRES_DSN" required:"true"`
 	S3Bucket    string `envconfig:"S3_BUCKET" required:"true"`
 	S3Endpoint  string `envconfig:"S3_ENDPOINT" required:"true"`
