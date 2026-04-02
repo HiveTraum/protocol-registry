@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"os"
@@ -43,6 +46,31 @@ func main() {
 						Usage: "Apply all pending migrations",
 						Action: func(c *cli.Context) error {
 							return runMigrateUp()
+						},
+					},
+				},
+			},
+			{
+				Name:  "auth",
+				Usage: "Authentication management",
+				Subcommands: []*cli.Command{
+					{
+						Name:  "create-key",
+						Usage: "Generate a new API key and store its hash in the database",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:  "namespace",
+								Value: "default",
+								Usage: "Namespace to scope the key to",
+							},
+							&cli.StringFlag{
+								Name:  "description",
+								Value: "",
+								Usage: "Human-readable description for the key",
+							},
+						},
+						Action: func(c *cli.Context) error {
+							return runCreateAPIKey(c.String("namespace"), c.String("description"))
 						},
 					},
 				},
@@ -99,5 +127,45 @@ func runMigrateUp() error {
 	}
 
 	slog.Info("migrations applied successfully")
+	return nil
+}
+
+func runCreateAPIKey(namespace, description string) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	db, err := sql.Open("pgx", cfg.PostgresDSN)
+	if err != nil {
+		return fmt.Errorf("failed to open database: %w", err)
+	}
+	defer db.Close()
+
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return fmt.Errorf("failed to generate random key: %w", err)
+	}
+	rawKey := hex.EncodeToString(raw)
+
+	sum := sha256.Sum256([]byte(rawKey))
+	keyHash := hex.EncodeToString(sum[:])
+
+	var id string
+	err = db.QueryRowContext(context.Background(),
+		`INSERT INTO api_keys (namespace, description, key_hash)
+		 VALUES ($1, $2, $3)
+		 RETURNING id`,
+		namespace, description, keyHash,
+	).Scan(&id)
+	if err != nil {
+		return fmt.Errorf("failed to store api key: %w", err)
+	}
+
+	fmt.Printf("id:        %s\n", id)
+	fmt.Printf("namespace: %s\n", namespace)
+	fmt.Printf("key:       %s\n", rawKey)
+	fmt.Println()
+	fmt.Println("Store the key securely — it will not be shown again.")
 	return nil
 }

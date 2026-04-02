@@ -17,6 +17,7 @@ type Config struct {
 	S3AccessKey string `envconfig:"S3_ACCESS_KEY" required:"true"`
 	S3SecretKey string `envconfig:"S3_SECRET_KEY" required:"true"`
 	S3Region    string `envconfig:"S3_REGION" default:"us-east-1"`
+	AuthEnabled bool   `envconfig:"AUTH_ENABLED" default:"false"`
 }
 
 func Load() (*Config, error) {

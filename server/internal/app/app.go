@@ -21,6 +21,7 @@ import (
 	"github.com/user/protocol_registry/internal/config"
 	grpccontroller "github.com/user/protocol_registry/internal/controllers/grpc"
 	"github.com/user/protocol_registry/internal/implementations"
+	"github.com/user/protocol_registry/internal/interceptors"
 	"github.com/user/protocol_registry/internal/usecases/get_grpc_view"
 	"github.com/user/protocol_registry/internal/usecases/get_protocol"
 	"github.com/user/protocol_registry/internal/usecases/list_protocol_versions"
@@ -87,6 +88,7 @@ func (a *App) Run(ctx context.Context) error {
 	serviceRepo := implementations.NewServiceRepositoryPostgres(pool)
 	protocolRepo := implementations.NewProtocolRepositoryPostgres(pool)
 	consumerRepo := implementations.NewConsumerRepositoryPostgres(pool)
+	apiKeyRepo := implementations.NewAPIKeyRepositoryPostgres(pool)
 	protocolStorage := implementations.NewProtocolStorageS3(s3Client, a.cfg.S3Bucket)
 	syntaxValidator := implementations.NewProtocolSyntaxValidatorProtocompile()
 	breakingChangesValidator := implementations.NewBreakingChangesValidatorProtocompile()
@@ -104,9 +106,15 @@ func (a *App) Run(ctx context.Context) error {
 	// Controller
 	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC, listVersionsUC)
 
-	// gRPC server with logging interceptor
+	// Interceptors
+	authInterceptor := interceptors.NewAuthInterceptor(apiKeyRepo, a.cfg.AuthEnabled)
+
+	// gRPC server with chained interceptors
 	a.grpcServer = grpc.NewServer(
-		grpc.UnaryInterceptor(a.loggingUnaryInterceptor()),
+		grpc.ChainUnaryInterceptor(
+			a.loggingUnaryInterceptor(),
+			authInterceptor.Unary(),
+		),
 	)
 	registryv1.RegisterProtocolRegistryServer(a.grpcServer, handler)
 
