@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProtocolRegistry_PublishProtocol_FullMethodName    = "/registry.v1.ProtocolRegistry/PublishProtocol"
-	ProtocolRegistry_GetProtocol_FullMethodName        = "/registry.v1.ProtocolRegistry/GetProtocol"
-	ProtocolRegistry_RegisterConsumer_FullMethodName   = "/registry.v1.ProtocolRegistry/RegisterConsumer"
-	ProtocolRegistry_UnregisterConsumer_FullMethodName = "/registry.v1.ProtocolRegistry/UnregisterConsumer"
-	ProtocolRegistry_GetGrpcView_FullMethodName        = "/registry.v1.ProtocolRegistry/GetGrpcView"
-	ProtocolRegistry_ListServices_FullMethodName       = "/registry.v1.ProtocolRegistry/ListServices"
+	ProtocolRegistry_PublishProtocol_FullMethodName      = "/registry.v1.ProtocolRegistry/PublishProtocol"
+	ProtocolRegistry_GetProtocol_FullMethodName          = "/registry.v1.ProtocolRegistry/GetProtocol"
+	ProtocolRegistry_RegisterConsumer_FullMethodName     = "/registry.v1.ProtocolRegistry/RegisterConsumer"
+	ProtocolRegistry_UnregisterConsumer_FullMethodName   = "/registry.v1.ProtocolRegistry/UnregisterConsumer"
+	ProtocolRegistry_GetGrpcView_FullMethodName          = "/registry.v1.ProtocolRegistry/GetGrpcView"
+	ProtocolRegistry_ListServices_FullMethodName         = "/registry.v1.ProtocolRegistry/ListServices"
+	ProtocolRegistry_ListProtocolVersions_FullMethodName = "/registry.v1.ProtocolRegistry/ListProtocolVersions"
 )
 
 // ProtocolRegistryClient is the client API for ProtocolRegistry service.
@@ -43,6 +44,8 @@ type ProtocolRegistryClient interface {
 	GetGrpcView(ctx context.Context, in *GetGrpcViewRequest, opts ...grpc.CallOption) (*GetGrpcViewResponse, error)
 	// List all registered services
 	ListServices(ctx context.Context, in *ListServicesRequest, opts ...grpc.CallOption) (*ListServicesResponse, error)
+	// List version history for a service protocol
+	ListProtocolVersions(ctx context.Context, in *ListProtocolVersionsRequest, opts ...grpc.CallOption) (*ListProtocolVersionsResponse, error)
 }
 
 type protocolRegistryClient struct {
@@ -113,6 +116,16 @@ func (c *protocolRegistryClient) ListServices(ctx context.Context, in *ListServi
 	return out, nil
 }
 
+func (c *protocolRegistryClient) ListProtocolVersions(ctx context.Context, in *ListProtocolVersionsRequest, opts ...grpc.CallOption) (*ListProtocolVersionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListProtocolVersionsResponse)
+	err := c.cc.Invoke(ctx, ProtocolRegistry_ListProtocolVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProtocolRegistryServer is the server API for ProtocolRegistry service.
 // All implementations must embed UnimplementedProtocolRegistryServer
 // for forward compatibility.
@@ -129,6 +142,8 @@ type ProtocolRegistryServer interface {
 	GetGrpcView(context.Context, *GetGrpcViewRequest) (*GetGrpcViewResponse, error)
 	// List all registered services
 	ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error)
+	// List version history for a service protocol
+	ListProtocolVersions(context.Context, *ListProtocolVersionsRequest) (*ListProtocolVersionsResponse, error)
 	mustEmbedUnimplementedProtocolRegistryServer()
 }
 
@@ -156,6 +171,9 @@ func (UnimplementedProtocolRegistryServer) GetGrpcView(context.Context, *GetGrpc
 }
 func (UnimplementedProtocolRegistryServer) ListServices(context.Context, *ListServicesRequest) (*ListServicesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListServices not implemented")
+}
+func (UnimplementedProtocolRegistryServer) ListProtocolVersions(context.Context, *ListProtocolVersionsRequest) (*ListProtocolVersionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListProtocolVersions not implemented")
 }
 func (UnimplementedProtocolRegistryServer) mustEmbedUnimplementedProtocolRegistryServer() {}
 func (UnimplementedProtocolRegistryServer) testEmbeddedByValue()                          {}
@@ -286,6 +304,24 @@ func _ProtocolRegistry_ListServices_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProtocolRegistry_ListProtocolVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListProtocolVersionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProtocolRegistryServer).ListProtocolVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProtocolRegistry_ListProtocolVersions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProtocolRegistryServer).ListProtocolVersions(ctx, req.(*ListProtocolVersionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProtocolRegistry_ServiceDesc is the grpc.ServiceDesc for ProtocolRegistry service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -316,6 +352,10 @@ var ProtocolRegistry_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListServices",
 			Handler:    _ProtocolRegistry_ListServices_Handler,
+		},
+		{
+			MethodName: "ListProtocolVersions",
+			Handler:    _ProtocolRegistry_ListProtocolVersions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

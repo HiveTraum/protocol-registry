@@ -29,3 +29,13 @@ type Protocol struct {
 	ContentHash string
 	UpdatedAt   time.Time
 }
+
+type ProtocolVersion struct {
+	ID            uuid.UUID
+	ServiceID     uuid.UUID
+	Type          ProtocolType
+	VersionNumber int
+	ContentHash   string
+	FileCount     int
+	PublishedAt   time.Time
+}

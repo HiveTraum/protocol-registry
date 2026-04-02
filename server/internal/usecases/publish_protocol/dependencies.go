@@ -15,6 +15,7 @@ type ServiceRepository interface {
 type ProtocolRepository interface {
 	GetByServiceAndType(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType) (*entities.Protocol, error)
 	Upsert(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType, contentHash string) (*entities.Protocol, bool, error)
+	InsertVersion(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType, contentHash string, fileCount int) (*entities.ProtocolVersion, error)
 }
 
 type Storage interface {

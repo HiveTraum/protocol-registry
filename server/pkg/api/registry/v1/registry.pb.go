@@ -1059,6 +1059,210 @@ func (x *ServiceInfo) GetName() string {
 	return ""
 }
 
+type ListProtocolVersionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServiceName   string                 `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	ProtocolType  ProtocolType           `protobuf:"varint,2,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Offset        int32                  `protobuf:"varint,4,opt,name=offset,proto3" json:"offset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListProtocolVersionsRequest) Reset() {
+	*x = ListProtocolVersionsRequest{}
+	mi := &file_registry_v1_registry_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListProtocolVersionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListProtocolVersionsRequest) ProtoMessage() {}
+
+func (x *ListProtocolVersionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_registry_v1_registry_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListProtocolVersionsRequest.ProtoReflect.Descriptor instead.
+func (*ListProtocolVersionsRequest) Descriptor() ([]byte, []int) {
+	return file_registry_v1_registry_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListProtocolVersionsRequest) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+func (x *ListProtocolVersionsRequest) GetProtocolType() ProtocolType {
+	if x != nil {
+		return x.ProtocolType
+	}
+	return ProtocolType_PROTOCOL_TYPE_UNSPECIFIED
+}
+
+func (x *ListProtocolVersionsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListProtocolVersionsRequest) GetOffset() int32 {
+	if x != nil {
+		return x.Offset
+	}
+	return 0
+}
+
+type ProtocolVersionInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VersionNumber int32                  `protobuf:"varint,1,opt,name=version_number,json=versionNumber,proto3" json:"version_number,omitempty"`
+	ContentHash   string                 `protobuf:"bytes,2,opt,name=content_hash,json=contentHash,proto3" json:"content_hash,omitempty"`
+	FileCount     int32                  `protobuf:"varint,3,opt,name=file_count,json=fileCount,proto3" json:"file_count,omitempty"`
+	PublishedAt   string                 `protobuf:"bytes,4,opt,name=published_at,json=publishedAt,proto3" json:"published_at,omitempty"` // ISO 8601 UTC timestamp
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProtocolVersionInfo) Reset() {
+	*x = ProtocolVersionInfo{}
+	mi := &file_registry_v1_registry_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProtocolVersionInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProtocolVersionInfo) ProtoMessage() {}
+
+func (x *ProtocolVersionInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_registry_v1_registry_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProtocolVersionInfo.ProtoReflect.Descriptor instead.
+func (*ProtocolVersionInfo) Descriptor() ([]byte, []int) {
+	return file_registry_v1_registry_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ProtocolVersionInfo) GetVersionNumber() int32 {
+	if x != nil {
+		return x.VersionNumber
+	}
+	return 0
+}
+
+func (x *ProtocolVersionInfo) GetContentHash() string {
+	if x != nil {
+		return x.ContentHash
+	}
+	return ""
+}
+
+func (x *ProtocolVersionInfo) GetFileCount() int32 {
+	if x != nil {
+		return x.FileCount
+	}
+	return 0
+}
+
+func (x *ProtocolVersionInfo) GetPublishedAt() string {
+	if x != nil {
+		return x.PublishedAt
+	}
+	return ""
+}
+
+type ListProtocolVersionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServiceName   string                 `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	ProtocolType  ProtocolType           `protobuf:"varint,2,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
+	Versions      []*ProtocolVersionInfo `protobuf:"bytes,3,rep,name=versions,proto3" json:"versions,omitempty"`
+	Total         int32                  `protobuf:"varint,4,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListProtocolVersionsResponse) Reset() {
+	*x = ListProtocolVersionsResponse{}
+	mi := &file_registry_v1_registry_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListProtocolVersionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListProtocolVersionsResponse) ProtoMessage() {}
+
+func (x *ListProtocolVersionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_registry_v1_registry_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListProtocolVersionsResponse.ProtoReflect.Descriptor instead.
+func (*ListProtocolVersionsResponse) Descriptor() ([]byte, []int) {
+	return file_registry_v1_registry_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListProtocolVersionsResponse) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+func (x *ListProtocolVersionsResponse) GetProtocolType() ProtocolType {
+	if x != nil {
+		return x.ProtocolType
+	}
+	return ProtocolType_PROTOCOL_TYPE_UNSPECIFIED
+}
+
+func (x *ListProtocolVersionsResponse) GetVersions() []*ProtocolVersionInfo {
+	if x != nil {
+		return x.Versions
+	}
+	return nil
+}
+
+func (x *ListProtocolVersionsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_registry_v1_registry_proto protoreflect.FileDescriptor
 
 const file_registry_v1_registry_proto_rawDesc = "" +
@@ -1130,17 +1334,34 @@ const file_registry_v1_registry_proto_rawDesc = "" +
 	"\bservices\x18\x01 \x03(\v2\x18.registry.v1.ServiceInfoR\bservices\"1\n" +
 	"\vServiceInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name*E\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xb5\x01\n" +
+	"\x1bListProtocolVersionsRequest\x12!\n" +
+	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12>\n" +
+	"\rprotocol_type\x18\x02 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\x12\x16\n" +
+	"\x06offset\x18\x04 \x01(\x05R\x06offset\"\xa1\x01\n" +
+	"\x13ProtocolVersionInfo\x12%\n" +
+	"\x0eversion_number\x18\x01 \x01(\x05R\rversionNumber\x12!\n" +
+	"\fcontent_hash\x18\x02 \x01(\tR\vcontentHash\x12\x1d\n" +
+	"\n" +
+	"file_count\x18\x03 \x01(\x05R\tfileCount\x12!\n" +
+	"\fpublished_at\x18\x04 \x01(\tR\vpublishedAt\"\xd5\x01\n" +
+	"\x1cListProtocolVersionsResponse\x12!\n" +
+	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12>\n" +
+	"\rprotocol_type\x18\x02 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12<\n" +
+	"\bversions\x18\x03 \x03(\v2 .registry.v1.ProtocolVersionInfoR\bversions\x12\x14\n" +
+	"\x05total\x18\x04 \x01(\x05R\x05total*E\n" +
 	"\fProtocolType\x12\x1d\n" +
 	"\x19PROTOCOL_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12PROTOCOL_TYPE_GRPC\x10\x012\xb1\x04\n" +
+	"\x12PROTOCOL_TYPE_GRPC\x10\x012\x9e\x05\n" +
 	"\x10ProtocolRegistry\x12\\\n" +
 	"\x0fPublishProtocol\x12#.registry.v1.PublishProtocolRequest\x1a$.registry.v1.PublishProtocolResponse\x12P\n" +
 	"\vGetProtocol\x12\x1f.registry.v1.GetProtocolRequest\x1a .registry.v1.GetProtocolResponse\x12_\n" +
 	"\x10RegisterConsumer\x12$.registry.v1.RegisterConsumerRequest\x1a%.registry.v1.RegisterConsumerResponse\x12e\n" +
 	"\x12UnregisterConsumer\x12&.registry.v1.UnregisterConsumerRequest\x1a'.registry.v1.UnregisterConsumerResponse\x12P\n" +
 	"\vGetGrpcView\x12\x1f.registry.v1.GetGrpcViewRequest\x1a .registry.v1.GetGrpcViewResponse\x12S\n" +
-	"\fListServices\x12 .registry.v1.ListServicesRequest\x1a!.registry.v1.ListServicesResponseB\xaf\x01\n" +
+	"\fListServices\x12 .registry.v1.ListServicesRequest\x1a!.registry.v1.ListServicesResponse\x12k\n" +
+	"\x14ListProtocolVersions\x12(.registry.v1.ListProtocolVersionsRequest\x1a).registry.v1.ListProtocolVersionsResponseB\xaf\x01\n" +
 	"\x0fcom.registry.v1B\rRegistryProtoP\x01Z@github.com/user/protocol_registry/pkg/api/registry/v1;registryv1\xa2\x02\x03RXX\xaa\x02\vRegistry.V1\xca\x02\vRegistry\\V1\xe2\x02\x17Registry\\V1\\GPBMetadata\xea\x02\fRegistry::V1b\x06proto3"
 
 var (
@@ -1156,27 +1377,30 @@ func file_registry_v1_registry_proto_rawDescGZIP() []byte {
 }
 
 var file_registry_v1_registry_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_registry_v1_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_registry_v1_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_registry_v1_registry_proto_goTypes = []any{
-	(ProtocolType)(0),                  // 0: registry.v1.ProtocolType
-	(*ProtoFile)(nil),                  // 1: registry.v1.ProtoFile
-	(*PublishProtocolRequest)(nil),     // 2: registry.v1.PublishProtocolRequest
-	(*PublishProtocolResponse)(nil),    // 3: registry.v1.PublishProtocolResponse
-	(*GetProtocolRequest)(nil),         // 4: registry.v1.GetProtocolRequest
-	(*GetProtocolResponse)(nil),        // 5: registry.v1.GetProtocolResponse
-	(*RegisterConsumerRequest)(nil),    // 6: registry.v1.RegisterConsumerRequest
-	(*RegisterConsumerResponse)(nil),   // 7: registry.v1.RegisterConsumerResponse
-	(*UnregisterConsumerRequest)(nil),  // 8: registry.v1.UnregisterConsumerRequest
-	(*UnregisterConsumerResponse)(nil), // 9: registry.v1.UnregisterConsumerResponse
-	(*GetGrpcViewRequest)(nil),         // 10: registry.v1.GetGrpcViewRequest
-	(*GetGrpcViewResponse)(nil),        // 11: registry.v1.GetGrpcViewResponse
-	(*GrpcServiceView)(nil),            // 12: registry.v1.GrpcServiceView
-	(*GrpcMethodView)(nil),             // 13: registry.v1.GrpcMethodView
-	(*GrpcMessageView)(nil),            // 14: registry.v1.GrpcMessageView
-	(*GrpcFieldView)(nil),              // 15: registry.v1.GrpcFieldView
-	(*ListServicesRequest)(nil),        // 16: registry.v1.ListServicesRequest
-	(*ListServicesResponse)(nil),       // 17: registry.v1.ListServicesResponse
-	(*ServiceInfo)(nil),                // 18: registry.v1.ServiceInfo
+	(ProtocolType)(0),                    // 0: registry.v1.ProtocolType
+	(*ProtoFile)(nil),                    // 1: registry.v1.ProtoFile
+	(*PublishProtocolRequest)(nil),       // 2: registry.v1.PublishProtocolRequest
+	(*PublishProtocolResponse)(nil),      // 3: registry.v1.PublishProtocolResponse
+	(*GetProtocolRequest)(nil),           // 4: registry.v1.GetProtocolRequest
+	(*GetProtocolResponse)(nil),          // 5: registry.v1.GetProtocolResponse
+	(*RegisterConsumerRequest)(nil),      // 6: registry.v1.RegisterConsumerRequest
+	(*RegisterConsumerResponse)(nil),     // 7: registry.v1.RegisterConsumerResponse
+	(*UnregisterConsumerRequest)(nil),    // 8: registry.v1.UnregisterConsumerRequest
+	(*UnregisterConsumerResponse)(nil),   // 9: registry.v1.UnregisterConsumerResponse
+	(*GetGrpcViewRequest)(nil),           // 10: registry.v1.GetGrpcViewRequest
+	(*GetGrpcViewResponse)(nil),          // 11: registry.v1.GetGrpcViewResponse
+	(*GrpcServiceView)(nil),              // 12: registry.v1.GrpcServiceView
+	(*GrpcMethodView)(nil),               // 13: registry.v1.GrpcMethodView
+	(*GrpcMessageView)(nil),              // 14: registry.v1.GrpcMessageView
+	(*GrpcFieldView)(nil),                // 15: registry.v1.GrpcFieldView
+	(*ListServicesRequest)(nil),          // 16: registry.v1.ListServicesRequest
+	(*ListServicesResponse)(nil),         // 17: registry.v1.ListServicesResponse
+	(*ServiceInfo)(nil),                  // 18: registry.v1.ServiceInfo
+	(*ListProtocolVersionsRequest)(nil),  // 19: registry.v1.ListProtocolVersionsRequest
+	(*ProtocolVersionInfo)(nil),          // 20: registry.v1.ProtocolVersionInfo
+	(*ListProtocolVersionsResponse)(nil), // 21: registry.v1.ListProtocolVersionsResponse
 }
 var file_registry_v1_registry_proto_depIdxs = []int32{
 	0,  // 0: registry.v1.PublishProtocolRequest.protocol_type:type_name -> registry.v1.ProtocolType
@@ -1193,23 +1417,28 @@ var file_registry_v1_registry_proto_depIdxs = []int32{
 	14, // 11: registry.v1.GrpcMethodView.output:type_name -> registry.v1.GrpcMessageView
 	15, // 12: registry.v1.GrpcMessageView.fields:type_name -> registry.v1.GrpcFieldView
 	18, // 13: registry.v1.ListServicesResponse.services:type_name -> registry.v1.ServiceInfo
-	2,  // 14: registry.v1.ProtocolRegistry.PublishProtocol:input_type -> registry.v1.PublishProtocolRequest
-	4,  // 15: registry.v1.ProtocolRegistry.GetProtocol:input_type -> registry.v1.GetProtocolRequest
-	6,  // 16: registry.v1.ProtocolRegistry.RegisterConsumer:input_type -> registry.v1.RegisterConsumerRequest
-	8,  // 17: registry.v1.ProtocolRegistry.UnregisterConsumer:input_type -> registry.v1.UnregisterConsumerRequest
-	10, // 18: registry.v1.ProtocolRegistry.GetGrpcView:input_type -> registry.v1.GetGrpcViewRequest
-	16, // 19: registry.v1.ProtocolRegistry.ListServices:input_type -> registry.v1.ListServicesRequest
-	3,  // 20: registry.v1.ProtocolRegistry.PublishProtocol:output_type -> registry.v1.PublishProtocolResponse
-	5,  // 21: registry.v1.ProtocolRegistry.GetProtocol:output_type -> registry.v1.GetProtocolResponse
-	7,  // 22: registry.v1.ProtocolRegistry.RegisterConsumer:output_type -> registry.v1.RegisterConsumerResponse
-	9,  // 23: registry.v1.ProtocolRegistry.UnregisterConsumer:output_type -> registry.v1.UnregisterConsumerResponse
-	11, // 24: registry.v1.ProtocolRegistry.GetGrpcView:output_type -> registry.v1.GetGrpcViewResponse
-	17, // 25: registry.v1.ProtocolRegistry.ListServices:output_type -> registry.v1.ListServicesResponse
-	20, // [20:26] is the sub-list for method output_type
-	14, // [14:20] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	0,  // 14: registry.v1.ListProtocolVersionsRequest.protocol_type:type_name -> registry.v1.ProtocolType
+	0,  // 15: registry.v1.ListProtocolVersionsResponse.protocol_type:type_name -> registry.v1.ProtocolType
+	20, // 16: registry.v1.ListProtocolVersionsResponse.versions:type_name -> registry.v1.ProtocolVersionInfo
+	2,  // 17: registry.v1.ProtocolRegistry.PublishProtocol:input_type -> registry.v1.PublishProtocolRequest
+	4,  // 18: registry.v1.ProtocolRegistry.GetProtocol:input_type -> registry.v1.GetProtocolRequest
+	6,  // 19: registry.v1.ProtocolRegistry.RegisterConsumer:input_type -> registry.v1.RegisterConsumerRequest
+	8,  // 20: registry.v1.ProtocolRegistry.UnregisterConsumer:input_type -> registry.v1.UnregisterConsumerRequest
+	10, // 21: registry.v1.ProtocolRegistry.GetGrpcView:input_type -> registry.v1.GetGrpcViewRequest
+	16, // 22: registry.v1.ProtocolRegistry.ListServices:input_type -> registry.v1.ListServicesRequest
+	19, // 23: registry.v1.ProtocolRegistry.ListProtocolVersions:input_type -> registry.v1.ListProtocolVersionsRequest
+	3,  // 24: registry.v1.ProtocolRegistry.PublishProtocol:output_type -> registry.v1.PublishProtocolResponse
+	5,  // 25: registry.v1.ProtocolRegistry.GetProtocol:output_type -> registry.v1.GetProtocolResponse
+	7,  // 26: registry.v1.ProtocolRegistry.RegisterConsumer:output_type -> registry.v1.RegisterConsumerResponse
+	9,  // 27: registry.v1.ProtocolRegistry.UnregisterConsumer:output_type -> registry.v1.UnregisterConsumerResponse
+	11, // 28: registry.v1.ProtocolRegistry.GetGrpcView:output_type -> registry.v1.GetGrpcViewResponse
+	17, // 29: registry.v1.ProtocolRegistry.ListServices:output_type -> registry.v1.ListServicesResponse
+	21, // 30: registry.v1.ProtocolRegistry.ListProtocolVersions:output_type -> registry.v1.ListProtocolVersionsResponse
+	24, // [24:31] is the sub-list for method output_type
+	17, // [17:24] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_registry_v1_registry_proto_init() }
@@ -1223,7 +1452,7 @@ func file_registry_v1_registry_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_registry_v1_registry_proto_rawDesc), len(file_registry_v1_registry_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   18,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

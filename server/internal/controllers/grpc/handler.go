@@ -10,6 +10,7 @@ import (
 	"github.com/user/protocol_registry/internal/entities"
 	"github.com/user/protocol_registry/internal/usecases/get_grpc_view"
 	"github.com/user/protocol_registry/internal/usecases/get_protocol"
+	"github.com/user/protocol_registry/internal/usecases/list_protocol_versions"
 	"github.com/user/protocol_registry/internal/usecases/list_services"
 	"github.com/user/protocol_registry/internal/usecases/publish_protocol"
 	"github.com/user/protocol_registry/internal/usecases/register_consumer"
@@ -22,12 +23,13 @@ import (
 
 type Handler struct {
 	registryv1.UnimplementedProtocolRegistryServer
-	publishUC      *publish_protocol.UseCase
-	getUC          *get_protocol.UseCase
-	registerUC     *register_consumer.UseCase
-	unregisterUC   *unregister_consumer.UseCase
-	grpcViewUC     *get_grpc_view.UseCase
-	listServicesUC *list_services.UseCase
+	publishUC           *publish_protocol.UseCase
+	getUC               *get_protocol.UseCase
+	registerUC          *register_consumer.UseCase
+	unregisterUC        *unregister_consumer.UseCase
+	grpcViewUC          *get_grpc_view.UseCase
+	listServicesUC      *list_services.UseCase
+	listVersionsUC      *list_protocol_versions.UseCase
 }
 
 func NewHandler(
@@ -37,6 +39,7 @@ func NewHandler(
 	unregisterUC *unregister_consumer.UseCase,
 	grpcViewUC *get_grpc_view.UseCase,
 	listServicesUC *list_services.UseCase,
+	listVersionsUC *list_protocol_versions.UseCase,
 ) *Handler {
 	return &Handler{
 		publishUC:      publishUC,
@@ -45,6 +48,7 @@ func NewHandler(
 		unregisterUC:   unregisterUC,
 		grpcViewUC:     grpcViewUC,
 		listServicesUC: listServicesUC,
+		listVersionsUC: listVersionsUC,
 	}
 }
 
@@ -212,6 +216,44 @@ func (h *Handler) ListServices(ctx context.Context, _ *registryv1.ListServicesRe
 
 	return &registryv1.ListServicesResponse{
 		Services: services,
+	}, nil
+}
+
+func (h *Handler) ListProtocolVersions(ctx context.Context, req *registryv1.ListProtocolVersionsRequest) (*registryv1.ListProtocolVersionsResponse, error) {
+	if req.ServiceName == "" {
+		return nil, status.Error(codes.InvalidArgument, "service_name is required")
+	}
+	if req.ProtocolType == registryv1.ProtocolType_PROTOCOL_TYPE_UNSPECIFIED {
+		return nil, status.Error(codes.InvalidArgument, "protocol_type is required")
+	}
+
+	input := list_protocol_versions.Input{
+		ServiceName:  req.ServiceName,
+		ProtocolType: protoTypeToEntity(req.ProtocolType),
+		Offset:       int(req.Offset),
+		Limit:        int(req.PageSize),
+	}
+
+	output, err := h.listVersionsUC.Execute(ctx, input)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	versions := make([]*registryv1.ProtocolVersionInfo, len(output.Versions))
+	for i, v := range output.Versions {
+		versions[i] = &registryv1.ProtocolVersionInfo{
+			VersionNumber: int32(v.VersionNumber),
+			ContentHash:   v.ContentHash,
+			FileCount:     int32(v.FileCount),
+			PublishedAt:   v.PublishedAt.UTC().Format("2006-01-02T15:04:05Z"),
+		}
+	}
+
+	return &registryv1.ListProtocolVersionsResponse{
+		ServiceName:  output.ServiceName,
+		ProtocolType: req.ProtocolType,
+		Versions:     versions,
+		Total:        int32(output.Total),
 	}, nil
 }
 

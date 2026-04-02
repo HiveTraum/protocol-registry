@@ -76,6 +76,10 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("upsert protocol: %w", err)
 	}
 
+	if _, err := uc.protocolRepo.InsertVersion(ctx, svc.ID, input.ProtocolType, contentHash, len(input.FileSet.Files)); err != nil {
+		return nil, fmt.Errorf("insert protocol version: %w", err)
+	}
+
 	return &Output{
 		ServiceName: input.ServiceName,
 		IsNew:       isNew,

@@ -23,6 +23,7 @@ import (
 	"github.com/user/protocol_registry/internal/implementations"
 	"github.com/user/protocol_registry/internal/usecases/get_grpc_view"
 	"github.com/user/protocol_registry/internal/usecases/get_protocol"
+	"github.com/user/protocol_registry/internal/usecases/list_protocol_versions"
 	"github.com/user/protocol_registry/internal/usecases/list_services"
 	"github.com/user/protocol_registry/internal/usecases/publish_protocol"
 	"github.com/user/protocol_registry/internal/usecases/register_consumer"
@@ -98,9 +99,10 @@ func (a *App) Run(ctx context.Context) error {
 	unregisterUC := unregister_consumer.New(serviceRepo, consumerRepo, protocolStorage)
 	grpcViewUC := get_grpc_view.New(serviceRepo, protocolRepo, protocolStorage, consumerRepo, protocolStorage, protoInspector)
 	listServicesUC := list_services.New(serviceRepo)
+	listVersionsUC := list_protocol_versions.New(serviceRepo, protocolRepo)
 
 	// Controller
-	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC)
+	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC, listVersionsUC)
 
 	// gRPC server with logging interceptor
 	a.grpcServer = grpc.NewServer(
