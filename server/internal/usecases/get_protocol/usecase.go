@@ -26,6 +26,11 @@ func New(
 }
 
 func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
+	version := input.Version
+	if version == "" {
+		version = "default"
+	}
+
 	svc, err := uc.serviceRepo.GetByName(ctx, input.ServiceName)
 	if err != nil {
 		return nil, fmt.Errorf("get service: %w", err)
@@ -34,7 +39,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, entities.NewServiceNotFoundError(input.ServiceName)
 	}
 
-	existing, err := uc.protocolRepo.GetByServiceAndType(ctx, svc.ID, input.ProtocolType)
+	existing, err := uc.protocolRepo.GetByServiceAndType(ctx, svc.ID, input.ProtocolType, version)
 	if err != nil {
 		return nil, fmt.Errorf("get protocol: %w", err)
 	}
@@ -42,7 +47,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, entities.NewProtocolNotFoundError(input.ServiceName)
 	}
 
-	fileSet, err := uc.storage.DownloadFileSet(ctx, input.ServiceName, input.ProtocolType)
+	fileSet, err := uc.storage.DownloadFileSet(ctx, input.ServiceName, version, input.ProtocolType)
 	if err != nil {
 		return nil, fmt.Errorf("download protocol: %w", err)
 	}
@@ -50,6 +55,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 	return &Output{
 		ServiceName:  input.ServiceName,
 		ProtocolType: input.ProtocolType,
+		Version:      version,
 		FileSet:      fileSet,
 	}, nil
 }

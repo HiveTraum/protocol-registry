@@ -31,8 +31,8 @@ type manifest struct {
 }
 
 // UploadFileSet uploads all files and then writes a manifest.
-func (s *ProtocolStorageS3) UploadFileSet(ctx context.Context, serviceName string, protocolType entities.ProtocolType, fileSet entities.ProtoFileSet) error {
-	prefix := protocolPrefix(serviceName, protocolType)
+func (s *ProtocolStorageS3) UploadFileSet(ctx context.Context, serviceName string, version string, protocolType entities.ProtocolType, fileSet entities.ProtoFileSet) error {
+	prefix := protocolPrefix(serviceName, version, protocolType)
 	for _, f := range fileSet.Files {
 		key := prefix + "files/" + f.Path
 		if _, err := s.client.PutObject(ctx, &s3.PutObjectInput{
@@ -49,14 +49,14 @@ func (s *ProtocolStorageS3) UploadFileSet(ctx context.Context, serviceName strin
 }
 
 // DownloadFileSet reads the manifest and downloads all referenced files.
-func (s *ProtocolStorageS3) DownloadFileSet(ctx context.Context, serviceName string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error) {
-	prefix := protocolPrefix(serviceName, protocolType)
+func (s *ProtocolStorageS3) DownloadFileSet(ctx context.Context, serviceName string, version string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error) {
+	prefix := protocolPrefix(serviceName, version, protocolType)
 	return s.readFileSet(ctx, prefix)
 }
 
 // UploadConsumerFileSet uploads consumer files and manifest.
-func (s *ProtocolStorageS3) UploadConsumerFileSet(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType, fileSet entities.ProtoFileSet) error {
-	prefix := consumerPrefix(consumerName, serverName, protocolType)
+func (s *ProtocolStorageS3) UploadConsumerFileSet(ctx context.Context, consumerName, serverName string, version string, protocolType entities.ProtocolType, fileSet entities.ProtoFileSet) error {
+	prefix := consumerPrefix(consumerName, serverName, version, protocolType)
 	for _, f := range fileSet.Files {
 		key := prefix + "files/" + f.Path
 		if _, err := s.client.PutObject(ctx, &s3.PutObjectInput{
@@ -73,14 +73,14 @@ func (s *ProtocolStorageS3) UploadConsumerFileSet(ctx context.Context, consumerN
 }
 
 // DownloadConsumerFileSet reads the consumer manifest and downloads all referenced files.
-func (s *ProtocolStorageS3) DownloadConsumerFileSet(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error) {
-	prefix := consumerPrefix(consumerName, serverName, protocolType)
+func (s *ProtocolStorageS3) DownloadConsumerFileSet(ctx context.Context, consumerName, serverName string, version string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error) {
+	prefix := consumerPrefix(consumerName, serverName, version, protocolType)
 	return s.readFileSet(ctx, prefix)
 }
 
 // DeleteConsumer deletes all objects under the consumer prefix.
-func (s *ProtocolStorageS3) DeleteConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType) error {
-	prefix := consumerPrefix(consumerName, serverName, protocolType)
+func (s *ProtocolStorageS3) DeleteConsumer(ctx context.Context, consumerName, serverName string, version string, protocolType entities.ProtocolType) error {
+	prefix := consumerPrefix(consumerName, serverName, version, protocolType)
 
 	paginator := s3.NewListObjectsV2Paginator(s.client, &s3.ListObjectsV2Input{
 		Bucket: aws.String(s.bucket),
@@ -186,10 +186,10 @@ func (s *ProtocolStorageS3) readFileSet(ctx context.Context, prefix string) (ent
 	}, nil
 }
 
-func protocolPrefix(serviceName string, protocolType entities.ProtocolType) string {
-	return fmt.Sprintf("protocols/%s/%s/", serviceName, protocolType.String())
+func protocolPrefix(serviceName string, version string, protocolType entities.ProtocolType) string {
+	return fmt.Sprintf("protocols/%s/%s/%s/", serviceName, version, protocolType.String())
 }
 
-func consumerPrefix(consumerName, serverName string, protocolType entities.ProtocolType) string {
-	return fmt.Sprintf("consumers/%s/%s/%s/", serverName, consumerName, protocolType.String())
+func consumerPrefix(consumerName, serverName string, version string, protocolType entities.ProtocolType) string {
+	return fmt.Sprintf("consumers/%s/%s/%s/%s/", serverName, version, consumerName, protocolType.String())
 }

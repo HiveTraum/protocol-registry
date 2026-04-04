@@ -26,6 +26,7 @@ type Protocol struct {
 	ID          uuid.UUID
 	ServiceID   uuid.UUID
 	Type        ProtocolType
+	Version     string
 	ContentHash string
 	UpdatedAt   time.Time
 }

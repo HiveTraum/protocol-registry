@@ -18,14 +18,14 @@ func NewProtocolRepositoryPostgres(pool *pgxpool.Pool) *ProtocolRepositoryPostgr
 	return &ProtocolRepositoryPostgres{pool: pool}
 }
 
-func (r *ProtocolRepositoryPostgres) GetByServiceAndType(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType) (*entities.Protocol, error) {
+func (r *ProtocolRepositoryPostgres) GetByServiceAndType(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType, version string) (*entities.Protocol, error) {
 	var p entities.Protocol
 	err := r.pool.QueryRow(ctx,
-		`SELECT id, service_id, protocol_type, content_hash, updated_at
+		`SELECT id, service_id, protocol_type, version, content_hash, updated_at
 		 FROM protocols
-		 WHERE service_id = $1 AND protocol_type = $2`,
-		serviceID, protocolType,
-	).Scan(&p.ID, &p.ServiceID, &p.Type, &p.ContentHash, &p.UpdatedAt)
+		 WHERE service_id = $1 AND protocol_type = $2 AND version = $3`,
+		serviceID, protocolType, version,
+	).Scan(&p.ID, &p.ServiceID, &p.Type, &p.Version, &p.ContentHash, &p.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -35,18 +35,18 @@ func (r *ProtocolRepositoryPostgres) GetByServiceAndType(ctx context.Context, se
 	return &p, nil
 }
 
-func (r *ProtocolRepositoryPostgres) Upsert(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType, contentHash string) (*entities.Protocol, bool, error) {
+func (r *ProtocolRepositoryPostgres) Upsert(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType, version string, contentHash string) (*entities.Protocol, bool, error) {
 	var p entities.Protocol
 	var created bool
 
 	err := r.pool.QueryRow(ctx,
-		`INSERT INTO protocols (service_id, protocol_type, content_hash)
-		 VALUES ($1, $2, $3)
-		 ON CONFLICT (service_id, protocol_type)
+		`INSERT INTO protocols (service_id, protocol_type, version, content_hash)
+		 VALUES ($1, $2, $3, $4)
+		 ON CONFLICT (service_id, protocol_type, version)
 		 DO UPDATE SET content_hash = EXCLUDED.content_hash, updated_at = NOW()
-		 RETURNING id, service_id, protocol_type, content_hash, updated_at, (xmax = 0) AS created`,
-		serviceID, protocolType, contentHash,
-	).Scan(&p.ID, &p.ServiceID, &p.Type, &p.ContentHash, &p.UpdatedAt, &created)
+		 RETURNING id, service_id, protocol_type, version, content_hash, updated_at, (xmax = 0) AS created`,
+		serviceID, protocolType, version, contentHash,
+	).Scan(&p.ID, &p.ServiceID, &p.Type, &p.Version, &p.ContentHash, &p.UpdatedAt, &created)
 	if err != nil {
 		return nil, false, err
 	}

@@ -10,6 +10,7 @@ type Input struct {
 	ProtocolType string
 	ProtoDir     string
 	EntryPoint   string
+	Versions     []string
 }
 
 type Output struct {

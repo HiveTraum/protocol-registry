@@ -11,6 +11,7 @@ type Consumer struct {
 	ConsumerServiceID uuid.UUID
 	ServerServiceID   uuid.UUID
 	ProtocolType      ProtocolType
+	Version           string
 	ContentHash       string
 	UpdatedAt         time.Time
 }

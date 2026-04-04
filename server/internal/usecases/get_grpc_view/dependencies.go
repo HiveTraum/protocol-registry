@@ -13,19 +13,19 @@ type ServiceRepository interface {
 }
 
 type ProtocolRepository interface {
-	GetByServiceAndType(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType) (*entities.Protocol, error)
+	GetByServiceAndType(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType, version string) (*entities.Protocol, error)
 }
 
 type Storage interface {
-	DownloadFileSet(ctx context.Context, serviceName string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error)
+	DownloadFileSet(ctx context.Context, serviceName string, version string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error)
 }
 
 type ConsumerRepository interface {
-	ListByServerAndType(ctx context.Context, serverServiceID uuid.UUID, protocolType entities.ProtocolType) ([]entities.Consumer, error)
+	ListByServerAndType(ctx context.Context, serverServiceID uuid.UUID, protocolType entities.ProtocolType, version string) ([]entities.Consumer, error)
 }
 
 type ConsumerStorage interface {
-	DownloadConsumerFileSet(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error)
+	DownloadConsumerFileSet(ctx context.Context, consumerName, serverName string, version string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error)
 }
 
 type ProtoInspector interface {

@@ -28,6 +28,9 @@ func (h *Handler) clientFetchCommand() *urfave.Command {
 		Name:      "fetch",
 		Usage:     "Download a service's protocol into the clients directory",
 		ArgsUsage: "<protocol> <service-name>",
+		Flags: []urfave.Flag{
+			&urfave.StringFlag{Name: "version", Value: "default", Usage: "Version to fetch"},
+		},
 		Action: func(c *urfave.Context) error {
 			if c.NArg() < 2 {
 				return fmt.Errorf("usage: prctl client fetch <protocol> <service-name>")
@@ -38,6 +41,7 @@ func (h *Handler) clientFetchCommand() *urfave.Command {
 			output, err := h.getUC.Execute(c.Context, get_protocol.Input{
 				ServiceName:  serviceName,
 				ProtocolType: protocolType,
+				Version:      c.String("version"),
 			})
 			if err != nil {
 				return err
@@ -66,6 +70,7 @@ func (h *Handler) clientRegisterCommand() *urfave.Command {
 		ArgsUsage: "<protocol> <service-name>",
 		Flags: []urfave.Flag{
 			&urfave.StringFlag{Name: "entry-point", Value: "default.proto", Usage: "Entry point .proto file (relative to proto-dir)"},
+			&urfave.StringSliceFlag{Name: "server-versions", Usage: "Server versions to register against (default: [\"default\"])"},
 		},
 		Action: func(c *urfave.Context) error {
 			if c.NArg() < 2 {
@@ -82,11 +87,12 @@ func (h *Handler) clientRegisterCommand() *urfave.Command {
 			protoDir := filepath.Join("protocols", protocolType, "clients", serverName)
 
 			output, err := h.registerUC.Execute(c.Context, register_consumer.Input{
-				ConsumerName: cfg.Service.Name,
-				ServerName:   serverName,
-				ProtocolType: protocolType,
-				ProtoDir:     protoDir,
-				EntryPoint:   c.String("entry-point"),
+				ConsumerName:   cfg.Service.Name,
+				ServerName:     serverName,
+				ProtocolType:   protocolType,
+				ProtoDir:       protoDir,
+				EntryPoint:     c.String("entry-point"),
+				ServerVersions: c.StringSlice("server-versions"),
 			})
 			if err != nil {
 				return err
@@ -105,6 +111,9 @@ func (h *Handler) clientUnregisterCommand() *urfave.Command {
 		Name:      "unregister",
 		Usage:     "Unregister as a consumer of a service's protocol",
 		ArgsUsage: "<protocol> <service-name>",
+		Flags: []urfave.Flag{
+			&urfave.StringSliceFlag{Name: "server-versions", Usage: "Server versions to unregister from (default: [\"default\"])"},
+		},
 		Action: func(c *urfave.Context) error {
 			if c.NArg() < 2 {
 				return fmt.Errorf("usage: prctl client unregister <protocol> <service-name>")
@@ -118,9 +127,10 @@ func (h *Handler) clientUnregisterCommand() *urfave.Command {
 			}
 
 			if err := h.unregisterUC.Execute(c.Context, unregister_consumer.Input{
-				ConsumerName: cfg.Service.Name,
-				ServerName:   serverName,
-				ProtocolType: protocolType,
+				ConsumerName:   cfg.Service.Name,
+				ServerName:     serverName,
+				ProtocolType:   protocolType,
+				ServerVersions: c.StringSlice("server-versions"),
 			}); err != nil {
 				return err
 			}

@@ -7,7 +7,7 @@ import (
 )
 
 type RegistryClient interface {
-	PublishProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType, files []ProtoFile, entryPoint string) (*Output, error)
+	PublishProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType, files []ProtoFile, entryPoint string, versions []string) (*Output, error)
 }
 
 type FileReader interface {

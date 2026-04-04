@@ -7,5 +7,5 @@ import (
 )
 
 type RegistryClient interface {
-	UnregisterConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType) error
+	UnregisterConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType, serverVersions []string) error
 }

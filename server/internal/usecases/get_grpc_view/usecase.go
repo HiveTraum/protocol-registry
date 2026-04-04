@@ -40,6 +40,11 @@ func New(
 }
 
 func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
+	version := input.Version
+	if version == "" {
+		version = "default"
+	}
+
 	svc, err := uc.serviceRepo.GetByName(ctx, input.ServiceName)
 	if err != nil {
 		return nil, fmt.Errorf("get service: %w", err)
@@ -48,7 +53,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, entities.NewServiceNotFoundError(input.ServiceName)
 	}
 
-	protocol, err := uc.protocolRepo.GetByServiceAndType(ctx, svc.ID, entities.ProtocolTypeGRPC)
+	protocol, err := uc.protocolRepo.GetByServiceAndType(ctx, svc.ID, entities.ProtocolTypeGRPC, version)
 	if err != nil {
 		return nil, fmt.Errorf("get protocol: %w", err)
 	}
@@ -56,7 +61,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, entities.NewProtocolNotFoundError(input.ServiceName)
 	}
 
-	serverFileSet, err := uc.storage.DownloadFileSet(ctx, input.ServiceName, entities.ProtocolTypeGRPC)
+	serverFileSet, err := uc.storage.DownloadFileSet(ctx, input.ServiceName, version, entities.ProtocolTypeGRPC)
 	if err != nil {
 		return nil, fmt.Errorf("download server proto: %w", err)
 	}
@@ -66,7 +71,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("inspect server proto: %w", err)
 	}
 
-	consumers, err := uc.consumerRepo.ListByServerAndType(ctx, svc.ID, entities.ProtocolTypeGRPC)
+	consumers, err := uc.consumerRepo.ListByServerAndType(ctx, svc.ID, entities.ProtocolTypeGRPC, version)
 	if err != nil {
 		return nil, fmt.Errorf("list consumers: %w", err)
 	}
@@ -79,7 +84,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 			return nil, fmt.Errorf("get consumer service: %w", err)
 		}
 
-		consumerFileSet, err := uc.consumerStorage.DownloadConsumerFileSet(ctx, consumerSvc.Name, input.ServiceName, entities.ProtocolTypeGRPC)
+		consumerFileSet, err := uc.consumerStorage.DownloadConsumerFileSet(ctx, consumerSvc.Name, input.ServiceName, version, entities.ProtocolTypeGRPC)
 		if err != nil {
 			return nil, fmt.Errorf("download consumer proto for %q: %w", consumerSvc.Name, err)
 		}

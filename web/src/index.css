@@ -1,0 +1,260 @@
+:root {
+  --text: #374151;
+  --text-h: #111827;
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --accent: #6366f1;
+  --accent-light: #eef2ff;
+  --badge-bg: #dbeafe;
+  --badge-text: #1e40af;
+  --error: #ef4444;
+
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+
+  font: 15px/1.5 var(--sans);
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #d1d5db;
+    --text-h: #f3f4f6;
+    --bg: #111827;
+    --surface: #1f2937;
+    --border: #374151;
+    --accent: #818cf8;
+    --accent-light: rgba(99, 102, 241, 0.15);
+    --badge-bg: rgba(59, 130, 246, 0.2);
+    --badge-text: #93c5fd;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { margin: 0; }
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.header {
+  padding: 24px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-h);
+  letter-spacing: -0.3px;
+}
+
+.main { padding-bottom: 48px; }
+
+.page h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin-bottom: 16px;
+}
+
+/* Loading / Error / Empty */
+.loading, .error, .empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--text);
+}
+.error { color: var(--error); }
+
+/* Service list */
+.service-list {
+  list-style: none;
+}
+
+.service-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  transition: border-color 0.15s;
+}
+
+.service-item:hover {
+  border-color: var(--accent);
+}
+
+.service-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.service-name {
+  font-weight: 500;
+  color: var(--text-h);
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+.service-arrow {
+  color: var(--accent);
+  font-size: 18px;
+}
+
+/* Back link */
+.back-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover { text-decoration: underline; }
+
+/* gRPC service view */
+.grpc-service {
+  margin-bottom: 24px;
+}
+
+.grpc-service-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+  font-family: var(--mono);
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: var(--accent-light);
+  border-radius: 6px;
+}
+
+/* Method */
+.method {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.method-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.method-badge {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.method-name {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-h);
+}
+
+.method-body {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Message */
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.message-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.message-name {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+/* Fields table */
+.fields-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.fields-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fields-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fields-table tr:last-child td {
+  border-bottom: none;
+}
+
+.field-number {
+  color: var(--text);
+  font-family: var(--mono);
+  width: 40px;
+}
+
+.field-name {
+  font-family: var(--mono);
+  color: var(--text-h);
+}
+
+.field-type {
+  font-family: var(--mono);
+  color: var(--accent);
+}
+
+/* Consumer badges */
+.consumer-badges {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.consumer-badge {
+  font-size: 11px;
+  font-family: var(--mono);
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  padding: 1px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}

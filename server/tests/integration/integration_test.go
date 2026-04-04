@@ -34,6 +34,7 @@ import (
 	"github.com/user/protocol_registry/internal/usecases/publish_protocol"
 	"github.com/user/protocol_registry/internal/usecases/register_consumer"
 	"github.com/user/protocol_registry/internal/usecases/unregister_consumer"
+	"github.com/user/protocol_registry/internal/usecases/validate_protocol"
 	registryv1 "github.com/user/protocol_registry/pkg/api/registry/v1"
 )
 
@@ -130,8 +131,9 @@ func TestMain(m *testing.M) {
 	unregisterUC := unregister_consumer.New(serviceRepo, consumerRepo, protocolStorage)
 	grpcViewUC := get_grpc_view.New(serviceRepo, protocolRepo, protocolStorage, consumerRepo, protocolStorage, protoInspector)
 	listServicesUC := list_services.New(serviceRepo)
+	validateUC := validate_protocol.New(serviceRepo, consumerRepo, protocolStorage, syntaxValidator, breakingChangesValidator)
 
-	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC)
+	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC, validateUC)
 
 	srv = grpc.NewServer()
 	registryv1.RegisterProtocolRegistryServer(srv, handler)

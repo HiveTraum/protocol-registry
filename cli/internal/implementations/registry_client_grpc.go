@@ -9,6 +9,7 @@ import (
 	"github.com/user/protocol-registry-cli/internal/usecases/publish_protocol"
 	"github.com/user/protocol-registry-cli/internal/usecases/register_consumer"
 	"github.com/user/protocol-registry-cli/internal/usecases/unregister_consumer"
+	"github.com/user/protocol-registry-cli/internal/usecases/validate_protocol"
 	registryv1 "github.com/user/protocol_registry/pkg/api/registry/v1"
 )
 
@@ -20,12 +21,13 @@ func NewRegistryClientGRPC(client registryv1.ProtocolRegistryClient) *RegistryCl
 	return &RegistryClientGRPC{client: client}
 }
 
-func (r *RegistryClientGRPC) PublishProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType, files []publish_protocol.ProtoFile, entryPoint string) (*publish_protocol.Output, error) {
+func (r *RegistryClientGRPC) PublishProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType, files []publish_protocol.ProtoFile, entryPoint string, versions []string) (*publish_protocol.Output, error) {
 	resp, err := r.client.PublishProtocol(ctx, &registryv1.PublishProtocolRequest{
 		ServiceName:  serviceName,
 		ProtocolType: toProtoType(protocolType),
 		Files:        toProtoFiles(files),
 		EntryPoint:   entryPoint,
+		Versions:     versions,
 	})
 	if err != nil {
 		return nil, err
@@ -37,10 +39,11 @@ func (r *RegistryClientGRPC) PublishProtocol(ctx context.Context, serviceName st
 	}, nil
 }
 
-func (r *RegistryClientGRPC) GetProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType) (*get_protocol.Output, error) {
+func (r *RegistryClientGRPC) GetProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType, version string) (*get_protocol.Output, error) {
 	resp, err := r.client.GetProtocol(ctx, &registryv1.GetProtocolRequest{
 		ServiceName:  serviceName,
 		ProtocolType: toProtoType(protocolType),
+		Version:      version,
 	})
 	if err != nil {
 		return nil, err
@@ -53,13 +56,14 @@ func (r *RegistryClientGRPC) GetProtocol(ctx context.Context, serviceName string
 	}, nil
 }
 
-func (r *RegistryClientGRPC) RegisterConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType, files []register_consumer.ProtoFile, entryPoint string) (*register_consumer.Output, error) {
+func (r *RegistryClientGRPC) RegisterConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType, files []register_consumer.ProtoFile, entryPoint string, serverVersions []string) (*register_consumer.Output, error) {
 	resp, err := r.client.RegisterConsumer(ctx, &registryv1.RegisterConsumerRequest{
-		ConsumerName: consumerName,
-		ServerName:   serverName,
-		ProtocolType: toProtoType(protocolType),
-		Files:        toRegisterProtoFiles(files),
-		EntryPoint:   entryPoint,
+		ConsumerName:   consumerName,
+		ServerName:     serverName,
+		ProtocolType:   toProtoType(protocolType),
+		Files:          toRegisterProtoFiles(files),
+		EntryPoint:     entryPoint,
+		ServerVersions: serverVersions,
 	})
 	if err != nil {
 		return nil, err
@@ -72,11 +76,12 @@ func (r *RegistryClientGRPC) RegisterConsumer(ctx context.Context, consumerName,
 	}, nil
 }
 
-func (r *RegistryClientGRPC) UnregisterConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType) error {
+func (r *RegistryClientGRPC) UnregisterConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType, serverVersions []string) error {
 	_, err := r.client.UnregisterConsumer(ctx, &registryv1.UnregisterConsumerRequest{
-		ConsumerName: consumerName,
-		ServerName:   serverName,
-		ProtocolType: toProtoType(protocolType),
+		ConsumerName:   consumerName,
+		ServerName:     serverName,
+		ProtocolType:   toProtoType(protocolType),
+		ServerVersions: serverVersions,
 	})
 	return err
 }
@@ -90,6 +95,47 @@ func (r *RegistryClientGRPC) GetGrpcView(ctx context.Context, serviceName string
 	}
 
 	return fromGrpcViewResponse(resp), nil
+}
+
+func (r *RegistryClientGRPC) ValidateProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType, files []validate_protocol.ProtoFile, entryPoint string, againstVersions []string) (*validate_protocol.Output, error) {
+	protoFiles := make([]*registryv1.ProtoFile, len(files))
+	for i, f := range files {
+		protoFiles[i] = &registryv1.ProtoFile{
+			Path:    f.Path,
+			Content: f.Content,
+		}
+	}
+
+	resp, err := r.client.ValidateProtocol(ctx, &registryv1.ValidateProtocolRequest{
+		ServiceName:     serviceName,
+		ProtocolType:    toProtoType(protocolType),
+		Files:           protoFiles,
+		EntryPoint:      entryPoint,
+		AgainstVersions: againstVersions,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	violations := make([]validate_protocol.VersionViolation, 0, len(resp.GetVersionViolations()))
+	for _, vv := range resp.GetVersionViolations() {
+		consumers := make([]validate_protocol.ConsumerViolation, 0, len(vv.GetConsumers()))
+		for _, cv := range vv.GetConsumers() {
+			consumers = append(consumers, validate_protocol.ConsumerViolation{
+				ConsumerName: cv.GetConsumerName(),
+				Violations:   cv.GetViolations(),
+			})
+		}
+		violations = append(violations, validate_protocol.VersionViolation{
+			Version:   vv.GetVersion(),
+			Consumers: consumers,
+		})
+	}
+
+	return &validate_protocol.Output{
+		Valid:      resp.GetValid(),
+		Violations: violations,
+	}, nil
 }
 
 func toProtoType(t entities.ProtocolType) registryv1.ProtocolType {
@@ -183,3 +229,4 @@ var _ get_protocol.RegistryClient = (*RegistryClientGRPC)(nil)
 var _ register_consumer.RegistryClient = (*RegistryClientGRPC)(nil)
 var _ unregister_consumer.RegistryClient = (*RegistryClientGRPC)(nil)
 var _ get_grpc_view.RegistryClient = (*RegistryClientGRPC)(nil)
+var _ validate_protocol.RegistryClient = (*RegistryClientGRPC)(nil)

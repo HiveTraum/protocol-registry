@@ -9,6 +9,7 @@ import (
 
 	"github.com/user/protocol-registry-cli/internal/usecases/publish_protocol"
 	"github.com/user/protocol-registry-cli/internal/usecases/register_consumer"
+	"github.com/user/protocol-registry-cli/internal/usecases/validate_protocol"
 )
 
 type rawProtoFile struct {
@@ -76,6 +77,25 @@ func (r *RegisterFileReader) ReadProtoFiles(dir string) ([]register_consumer.Pro
 	result := make([]register_consumer.ProtoFile, len(raw))
 	for i, f := range raw {
 		result[i] = register_consumer.ProtoFile{Path: f.path, Content: f.content}
+	}
+	return result, nil
+}
+
+// ValidateFileReader satisfies validate_protocol.FileReader.
+type ValidateFileReader struct{}
+
+func NewValidateFileReader() *ValidateFileReader {
+	return &ValidateFileReader{}
+}
+
+func (r *ValidateFileReader) ReadProtoFiles(dir string) ([]validate_protocol.ProtoFile, error) {
+	raw, err := collectProtoFiles(dir)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]validate_protocol.ProtoFile, len(raw))
+	for i, f := range raw {
+		result[i] = validate_protocol.ProtoFile{Path: f.path, Content: f.content}
 	}
 	return result, nil
 }

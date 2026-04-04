@@ -12,9 +12,9 @@ type ServiceRepository interface {
 }
 
 type ConsumerRepository interface {
-	Delete(ctx context.Context, consumerServiceID, serverServiceID uuid.UUID, protocolType entities.ProtocolType) error
+	Delete(ctx context.Context, consumerServiceID, serverServiceID uuid.UUID, protocolType entities.ProtocolType, version string) error
 }
 
 type ConsumerStorage interface {
-	DeleteConsumer(ctx context.Context, consumerName, serverName string, protocolType entities.ProtocolType) error
+	DeleteConsumer(ctx context.Context, consumerName, serverName string, version string, protocolType entities.ProtocolType) error
 }

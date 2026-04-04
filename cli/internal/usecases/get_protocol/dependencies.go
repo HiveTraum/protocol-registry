@@ -7,5 +7,5 @@ import (
 )
 
 type RegistryClient interface {
-	GetProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType) (*Output, error)
+	GetProtocol(ctx context.Context, serviceName string, protocolType entities.ProtocolType, version string) (*Output, error)
 }

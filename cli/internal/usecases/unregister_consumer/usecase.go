@@ -20,7 +20,7 @@ func New(registryClient RegistryClient) *UseCase {
 func (uc *UseCase) Execute(ctx context.Context, input Input) error {
 	protocolType := entities.ParseProtocolType(input.ProtocolType)
 
-	if err := uc.registryClient.UnregisterConsumer(ctx, input.ConsumerName, input.ServerName, protocolType); err != nil {
+	if err := uc.registryClient.UnregisterConsumer(ctx, input.ConsumerName, input.ServerName, protocolType, input.ServerVersions); err != nil {
 		return fmt.Errorf("unregister: %w", err)
 	}
 

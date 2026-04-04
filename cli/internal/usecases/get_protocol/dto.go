@@ -8,6 +8,7 @@ type ProtoFile struct {
 type Input struct {
 	ServiceName  string
 	ProtocolType string
+	Version      string
 }
 
 type Output struct {

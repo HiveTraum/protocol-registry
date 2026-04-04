@@ -13,6 +13,12 @@ service ProtocolRegistry {
 
   // Register a consumer of a service's protocol
   rpc RegisterConsumer(RegisterConsumerRequest) returns (RegisterConsumerResponse);
+
+  // Unregister a consumer of a service's protocol
+  rpc UnregisterConsumer(UnregisterConsumerRequest) returns (UnregisterConsumerResponse);
+
+  // Validate a protocol against existing consumers without publishing
+  rpc ValidateProtocol(ValidateProtocolRequest) returns (ValidateProtocolResponse);
 }
 
 enum ProtocolType {
@@ -33,6 +39,7 @@ message PublishProtocolRequest {
   ProtocolType protocol_type = 3;
   repeated ProtoFile files = 4;
   string entry_point = 5;
+  repeated string versions = 6;
 }
 
 message PublishProtocolResponse {
@@ -43,6 +50,7 @@ message PublishProtocolResponse {
 message GetProtocolRequest {
   string service_name = 1;
   ProtocolType protocol_type = 2;
+  string version = 3;
 }
 
 message GetProtocolResponse {
@@ -60,6 +68,7 @@ message RegisterConsumerRequest {
   reserved 4;
   repeated ProtoFile files = 5;
   string entry_point = 6;
+  repeated string server_versions = 7;
 }
 
 message RegisterConsumerResponse {
@@ -72,6 +81,7 @@ message UnregisterConsumerRequest {
   string consumer_name = 1;
   string server_name = 2;
   ProtocolType protocol_type = 3;
+  repeated string server_versions = 4;
 }
 
 message UnregisterConsumerResponse {}
@@ -118,4 +128,27 @@ message ListServicesResponse {
 message ServiceInfo {
   string id = 1;
   string name = 2;
+}
+
+message ValidateProtocolRequest {
+  string service_name = 1;
+  ProtocolType protocol_type = 2;
+  repeated ProtoFile files = 3;
+  string entry_point = 4;
+  repeated string against_versions = 5;
+}
+
+message VersionViolation {
+  string version = 1;
+  repeated ConsumerViolation consumers = 2;
+}
+
+message ConsumerViolation {
+  string consumer_name = 1;
+  repeated string violations = 2;
+}
+
+message ValidateProtocolResponse {
+  bool valid = 1;
+  repeated VersionViolation version_violations = 2;
 }

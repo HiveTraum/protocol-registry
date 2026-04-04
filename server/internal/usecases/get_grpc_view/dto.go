@@ -2,6 +2,7 @@ package get_grpc_view
 
 type Input struct {
 	ServiceName string
+	Version     string
 }
 
 type Output struct {

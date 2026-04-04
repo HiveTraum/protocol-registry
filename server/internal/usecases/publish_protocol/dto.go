@@ -6,6 +6,7 @@ type Input struct {
 	ServiceName  string
 	ProtocolType entities.ProtocolType
 	FileSet      entities.ProtoFileSet
+	Versions     []string
 }
 
 type Output struct {

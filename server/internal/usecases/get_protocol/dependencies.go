@@ -12,9 +12,9 @@ type ServiceRepository interface {
 }
 
 type ProtocolRepository interface {
-	GetByServiceAndType(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType) (*entities.Protocol, error)
+	GetByServiceAndType(ctx context.Context, serviceID uuid.UUID, protocolType entities.ProtocolType, version string) (*entities.Protocol, error)
 }
 
 type Storage interface {
-	DownloadFileSet(ctx context.Context, serviceName string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error)
+	DownloadFileSet(ctx context.Context, serviceName string, version string, protocolType entities.ProtocolType) (entities.ProtoFileSet, error)
 }

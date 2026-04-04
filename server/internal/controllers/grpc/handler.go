@@ -14,6 +14,7 @@ import (
 	"github.com/user/protocol_registry/internal/usecases/publish_protocol"
 	"github.com/user/protocol_registry/internal/usecases/register_consumer"
 	"github.com/user/protocol_registry/internal/usecases/unregister_consumer"
+	"github.com/user/protocol_registry/internal/usecases/validate_protocol"
 	registryv1 "github.com/user/protocol_registry/pkg/api/registry/v1"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
@@ -28,6 +29,7 @@ type Handler struct {
 	unregisterUC   *unregister_consumer.UseCase
 	grpcViewUC     *get_grpc_view.UseCase
 	listServicesUC *list_services.UseCase
+	validateUC     *validate_protocol.UseCase
 }
 
 func NewHandler(
@@ -37,6 +39,7 @@ func NewHandler(
 	unregisterUC *unregister_consumer.UseCase,
 	grpcViewUC *get_grpc_view.UseCase,
 	listServicesUC *list_services.UseCase,
+	validateUC *validate_protocol.UseCase,
 ) *Handler {
 	return &Handler{
 		publishUC:      publishUC,
@@ -45,6 +48,7 @@ func NewHandler(
 		unregisterUC:   unregisterUC,
 		grpcViewUC:     grpcViewUC,
 		listServicesUC: listServicesUC,
+		validateUC:     validateUC,
 	}
 }
 
@@ -59,10 +63,16 @@ func (h *Handler) PublishProtocol(ctx context.Context, req *registryv1.PublishPr
 		return nil, err
 	}
 
+	versions := req.Versions
+	if len(versions) == 0 {
+		versions = []string{"default"}
+	}
+
 	input := publish_protocol.Input{
 		ServiceName:  req.ServiceName,
 		ProtocolType: protoTypeToEntity(req.ProtocolType),
 		FileSet:      protoFilesToFileSet(req.Files, req.EntryPoint),
+		Versions:     versions,
 	}
 
 	output, err := h.publishUC.Execute(ctx, input)
@@ -84,9 +94,15 @@ func (h *Handler) GetProtocol(ctx context.Context, req *registryv1.GetProtocolRe
 		return nil, status.Error(codes.InvalidArgument, "protocol_type is required")
 	}
 
+	version := req.Version
+	if version == "" {
+		version = "default"
+	}
+
 	input := get_protocol.Input{
 		ServiceName:  req.ServiceName,
 		ProtocolType: protoTypeToEntity(req.ProtocolType),
+		Version:      version,
 	}
 
 	output, err := h.getUC.Execute(ctx, input)
@@ -116,11 +132,17 @@ func (h *Handler) RegisterConsumer(ctx context.Context, req *registryv1.Register
 		return nil, err
 	}
 
+	serverVersions := req.ServerVersions
+	if len(serverVersions) == 0 {
+		serverVersions = []string{"default"}
+	}
+
 	input := register_consumer.Input{
-		ConsumerName: req.ConsumerName,
-		ServerName:   req.ServerName,
-		ProtocolType: protoTypeToEntity(req.ProtocolType),
-		FileSet:      protoFilesToFileSet(req.Files, req.EntryPoint),
+		ConsumerName:   req.ConsumerName,
+		ServerName:     req.ServerName,
+		ProtocolType:   protoTypeToEntity(req.ProtocolType),
+		FileSet:        protoFilesToFileSet(req.Files, req.EntryPoint),
+		ServerVersions: serverVersions,
 	}
 
 	output, err := h.registerUC.Execute(ctx, input)
@@ -146,10 +168,16 @@ func (h *Handler) UnregisterConsumer(ctx context.Context, req *registryv1.Unregi
 		return nil, status.Error(codes.InvalidArgument, "protocol_type is required")
 	}
 
+	serverVersions := req.ServerVersions
+	if len(serverVersions) == 0 {
+		serverVersions = []string{"default"}
+	}
+
 	input := unregister_consumer.Input{
-		ConsumerName: req.ConsumerName,
-		ServerName:   req.ServerName,
-		ProtocolType: protoTypeToEntity(req.ProtocolType),
+		ConsumerName:   req.ConsumerName,
+		ServerName:     req.ServerName,
+		ProtocolType:   protoTypeToEntity(req.ProtocolType),
+		ServerVersions: serverVersions,
 	}
 
 	if err := h.unregisterUC.Execute(ctx, input); err != nil {
@@ -212,6 +240,59 @@ func (h *Handler) ListServices(ctx context.Context, _ *registryv1.ListServicesRe
 
 	return &registryv1.ListServicesResponse{
 		Services: services,
+	}, nil
+}
+
+func (h *Handler) ValidateProtocol(ctx context.Context, req *registryv1.ValidateProtocolRequest) (*registryv1.ValidateProtocolResponse, error) {
+	if req.ServiceName == "" {
+		return nil, status.Error(codes.InvalidArgument, "service_name is required")
+	}
+	if req.ProtocolType == registryv1.ProtocolType_PROTOCOL_TYPE_UNSPECIFIED {
+		return nil, status.Error(codes.InvalidArgument, "protocol_type is required")
+	}
+	if err := validateFileSetRequest(req.Files, req.EntryPoint); err != nil {
+		return nil, err
+	}
+
+	againstVersions := req.AgainstVersions
+	if len(againstVersions) == 0 {
+		againstVersions = []string{"default"}
+	}
+
+	input := validate_protocol.Input{
+		ServiceName:     req.ServiceName,
+		ProtocolType:    protoTypeToEntity(req.ProtocolType),
+		FileSet:         protoFilesToFileSet(req.Files, req.EntryPoint),
+		AgainstVersions: againstVersions,
+	}
+
+	output, err := h.validateUC.Execute(ctx, input)
+	if err != nil {
+		return nil, mapDomainError(err)
+	}
+
+	protoViolations := make([]*registryv1.VersionViolation, 0, len(output.Violations))
+	for _, vv := range output.Violations {
+		consumerViolations := make([]*registryv1.ConsumerViolation, 0, len(vv.Consumers))
+		for _, cv := range vv.Consumers {
+			var msgs []string
+			for _, c := range cv.Changes {
+				msgs = append(msgs, fmt.Sprintf("[%s] %s", c.Type, c.Message))
+			}
+			consumerViolations = append(consumerViolations, &registryv1.ConsumerViolation{
+				ConsumerName: cv.ConsumerName,
+				Violations:   msgs,
+			})
+		}
+		protoViolations = append(protoViolations, &registryv1.VersionViolation{
+			Version:   vv.Version,
+			Consumers: consumerViolations,
+		})
+	}
+
+	return &registryv1.ValidateProtocolResponse{
+		Valid:             output.Valid,
+		VersionViolations: protoViolations,
 	}, nil
 }
 

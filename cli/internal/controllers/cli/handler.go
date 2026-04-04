@@ -9,6 +9,7 @@ import (
 	"github.com/user/protocol-registry-cli/internal/usecases/publish_protocol"
 	"github.com/user/protocol-registry-cli/internal/usecases/register_consumer"
 	"github.com/user/protocol-registry-cli/internal/usecases/unregister_consumer"
+	"github.com/user/protocol-registry-cli/internal/usecases/validate_protocol"
 	urfave "github.com/urfave/cli/v2"
 )
 
@@ -17,6 +18,7 @@ type Handler struct {
 	getUC        *get_protocol.UseCase
 	registerUC   *register_consumer.UseCase
 	unregisterUC *unregister_consumer.UseCase
+	validateUC   *validate_protocol.UseCase
 	closer       io.Closer
 }
 
@@ -34,6 +36,7 @@ func (h *Handler) Init(addr string) error {
 	h.getUC = a.GetUC
 	h.registerUC = a.RegisterUC
 	h.unregisterUC = a.UnregisterUC
+	h.validateUC = a.ValidateUC
 	h.closer = a
 
 	return nil

@@ -125,6 +125,7 @@ type PublishProtocolRequest struct {
 	ProtocolType  ProtocolType           `protobuf:"varint,3,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
 	Files         []*ProtoFile           `protobuf:"bytes,4,rep,name=files,proto3" json:"files,omitempty"`
 	EntryPoint    string                 `protobuf:"bytes,5,opt,name=entry_point,json=entryPoint,proto3" json:"entry_point,omitempty"`
+	Versions      []string               `protobuf:"bytes,6,rep,name=versions,proto3" json:"versions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -187,6 +188,13 @@ func (x *PublishProtocolRequest) GetEntryPoint() string {
 	return ""
 }
 
+func (x *PublishProtocolRequest) GetVersions() []string {
+	if x != nil {
+		return x.Versions
+	}
+	return nil
+}
+
 type PublishProtocolResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ServiceName   string                 `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
@@ -243,6 +251,7 @@ type GetProtocolRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ServiceName   string                 `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
 	ProtocolType  ProtocolType           `protobuf:"varint,2,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
+	Version       string                 `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -289,6 +298,13 @@ func (x *GetProtocolRequest) GetProtocolType() ProtocolType {
 		return x.ProtocolType
 	}
 	return ProtocolType_PROTOCOL_TYPE_UNSPECIFIED
+}
+
+func (x *GetProtocolRequest) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
 }
 
 type GetProtocolResponse struct {
@@ -360,14 +376,15 @@ func (x *GetProtocolResponse) GetEntryPoint() string {
 }
 
 type RegisterConsumerRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ConsumerName  string                 `protobuf:"bytes,1,opt,name=consumer_name,json=consumerName,proto3" json:"consumer_name,omitempty"`
-	ServerName    string                 `protobuf:"bytes,2,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
-	ProtocolType  ProtocolType           `protobuf:"varint,3,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
-	Files         []*ProtoFile           `protobuf:"bytes,5,rep,name=files,proto3" json:"files,omitempty"`
-	EntryPoint    string                 `protobuf:"bytes,6,opt,name=entry_point,json=entryPoint,proto3" json:"entry_point,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConsumerName   string                 `protobuf:"bytes,1,opt,name=consumer_name,json=consumerName,proto3" json:"consumer_name,omitempty"`
+	ServerName     string                 `protobuf:"bytes,2,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
+	ProtocolType   ProtocolType           `protobuf:"varint,3,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
+	Files          []*ProtoFile           `protobuf:"bytes,5,rep,name=files,proto3" json:"files,omitempty"`
+	EntryPoint     string                 `protobuf:"bytes,6,opt,name=entry_point,json=entryPoint,proto3" json:"entry_point,omitempty"`
+	ServerVersions []string               `protobuf:"bytes,7,rep,name=server_versions,json=serverVersions,proto3" json:"server_versions,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *RegisterConsumerRequest) Reset() {
@@ -435,6 +452,13 @@ func (x *RegisterConsumerRequest) GetEntryPoint() string {
 	return ""
 }
 
+func (x *RegisterConsumerRequest) GetServerVersions() []string {
+	if x != nil {
+		return x.ServerVersions
+	}
+	return nil
+}
+
 type RegisterConsumerResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ConsumerName  string                 `protobuf:"bytes,1,opt,name=consumer_name,json=consumerName,proto3" json:"consumer_name,omitempty"`
@@ -496,12 +520,13 @@ func (x *RegisterConsumerResponse) GetIsNew() bool {
 }
 
 type UnregisterConsumerRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ConsumerName  string                 `protobuf:"bytes,1,opt,name=consumer_name,json=consumerName,proto3" json:"consumer_name,omitempty"`
-	ServerName    string                 `protobuf:"bytes,2,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
-	ProtocolType  ProtocolType           `protobuf:"varint,3,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ConsumerName   string                 `protobuf:"bytes,1,opt,name=consumer_name,json=consumerName,proto3" json:"consumer_name,omitempty"`
+	ServerName     string                 `protobuf:"bytes,2,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
+	ProtocolType   ProtocolType           `protobuf:"varint,3,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
+	ServerVersions []string               `protobuf:"bytes,4,rep,name=server_versions,json=serverVersions,proto3" json:"server_versions,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *UnregisterConsumerRequest) Reset() {
@@ -553,6 +578,13 @@ func (x *UnregisterConsumerRequest) GetProtocolType() ProtocolType {
 		return x.ProtocolType
 	}
 	return ProtocolType_PROTOCOL_TYPE_UNSPECIFIED
+}
+
+func (x *UnregisterConsumerRequest) GetServerVersions() []string {
+	if x != nil {
+		return x.ServerVersions
+	}
+	return nil
 }
 
 type UnregisterConsumerResponse struct {
@@ -1059,6 +1091,238 @@ func (x *ServiceInfo) GetName() string {
 	return ""
 }
 
+type ValidateProtocolRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ServiceName     string                 `protobuf:"bytes,1,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	ProtocolType    ProtocolType           `protobuf:"varint,2,opt,name=protocol_type,json=protocolType,proto3,enum=registry.v1.ProtocolType" json:"protocol_type,omitempty"`
+	Files           []*ProtoFile           `protobuf:"bytes,3,rep,name=files,proto3" json:"files,omitempty"`
+	EntryPoint      string                 `protobuf:"bytes,4,opt,name=entry_point,json=entryPoint,proto3" json:"entry_point,omitempty"`
+	AgainstVersions []string               `protobuf:"bytes,5,rep,name=against_versions,json=againstVersions,proto3" json:"against_versions,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ValidateProtocolRequest) Reset() {
+	*x = ValidateProtocolRequest{}
+	mi := &file_registry_v1_registry_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateProtocolRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateProtocolRequest) ProtoMessage() {}
+
+func (x *ValidateProtocolRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_registry_v1_registry_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateProtocolRequest.ProtoReflect.Descriptor instead.
+func (*ValidateProtocolRequest) Descriptor() ([]byte, []int) {
+	return file_registry_v1_registry_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ValidateProtocolRequest) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+func (x *ValidateProtocolRequest) GetProtocolType() ProtocolType {
+	if x != nil {
+		return x.ProtocolType
+	}
+	return ProtocolType_PROTOCOL_TYPE_UNSPECIFIED
+}
+
+func (x *ValidateProtocolRequest) GetFiles() []*ProtoFile {
+	if x != nil {
+		return x.Files
+	}
+	return nil
+}
+
+func (x *ValidateProtocolRequest) GetEntryPoint() string {
+	if x != nil {
+		return x.EntryPoint
+	}
+	return ""
+}
+
+func (x *ValidateProtocolRequest) GetAgainstVersions() []string {
+	if x != nil {
+		return x.AgainstVersions
+	}
+	return nil
+}
+
+type VersionViolation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Version       string                 `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Consumers     []*ConsumerViolation   `protobuf:"bytes,2,rep,name=consumers,proto3" json:"consumers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VersionViolation) Reset() {
+	*x = VersionViolation{}
+	mi := &file_registry_v1_registry_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VersionViolation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VersionViolation) ProtoMessage() {}
+
+func (x *VersionViolation) ProtoReflect() protoreflect.Message {
+	mi := &file_registry_v1_registry_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VersionViolation.ProtoReflect.Descriptor instead.
+func (*VersionViolation) Descriptor() ([]byte, []int) {
+	return file_registry_v1_registry_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *VersionViolation) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *VersionViolation) GetConsumers() []*ConsumerViolation {
+	if x != nil {
+		return x.Consumers
+	}
+	return nil
+}
+
+type ConsumerViolation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ConsumerName  string                 `protobuf:"bytes,1,opt,name=consumer_name,json=consumerName,proto3" json:"consumer_name,omitempty"`
+	Violations    []string               `protobuf:"bytes,2,rep,name=violations,proto3" json:"violations,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConsumerViolation) Reset() {
+	*x = ConsumerViolation{}
+	mi := &file_registry_v1_registry_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConsumerViolation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConsumerViolation) ProtoMessage() {}
+
+func (x *ConsumerViolation) ProtoReflect() protoreflect.Message {
+	mi := &file_registry_v1_registry_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConsumerViolation.ProtoReflect.Descriptor instead.
+func (*ConsumerViolation) Descriptor() ([]byte, []int) {
+	return file_registry_v1_registry_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ConsumerViolation) GetConsumerName() string {
+	if x != nil {
+		return x.ConsumerName
+	}
+	return ""
+}
+
+func (x *ConsumerViolation) GetViolations() []string {
+	if x != nil {
+		return x.Violations
+	}
+	return nil
+}
+
+type ValidateProtocolResponse struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Valid             bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
+	VersionViolations []*VersionViolation    `protobuf:"bytes,2,rep,name=version_violations,json=versionViolations,proto3" json:"version_violations,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ValidateProtocolResponse) Reset() {
+	*x = ValidateProtocolResponse{}
+	mi := &file_registry_v1_registry_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateProtocolResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateProtocolResponse) ProtoMessage() {}
+
+func (x *ValidateProtocolResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_registry_v1_registry_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateProtocolResponse.ProtoReflect.Descriptor instead.
+func (*ValidateProtocolResponse) Descriptor() ([]byte, []int) {
+	return file_registry_v1_registry_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ValidateProtocolResponse) GetValid() bool {
+	if x != nil {
+		return x.Valid
+	}
+	return false
+}
+
+func (x *ValidateProtocolResponse) GetVersionViolations() []*VersionViolation {
+	if x != nil {
+		return x.VersionViolations
+	}
+	return nil
+}
+
 var File_registry_v1_registry_proto protoreflect.FileDescriptor
 
 const file_registry_v1_registry_proto_rawDesc = "" +
@@ -1066,25 +1330,27 @@ const file_registry_v1_registry_proto_rawDesc = "" +
 	"\x1aregistry/v1/registry.proto\x12\vregistry.v1\"9\n" +
 	"\tProtoFile\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\fR\acontent\"\xd0\x01\n" +
+	"\acontent\x18\x02 \x01(\fR\acontent\"\xec\x01\n" +
 	"\x16PublishProtocolRequest\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12>\n" +
 	"\rprotocol_type\x18\x03 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12,\n" +
 	"\x05files\x18\x04 \x03(\v2\x16.registry.v1.ProtoFileR\x05files\x12\x1f\n" +
 	"\ventry_point\x18\x05 \x01(\tR\n" +
-	"entryPointJ\x04\b\x02\x10\x03\"S\n" +
+	"entryPoint\x12\x1a\n" +
+	"\bversions\x18\x06 \x03(\tR\bversionsJ\x04\b\x02\x10\x03\"S\n" +
 	"\x17PublishProtocolResponse\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12\x15\n" +
-	"\x06is_new\x18\x02 \x01(\bR\x05isNew\"w\n" +
+	"\x06is_new\x18\x02 \x01(\bR\x05isNew\"\x91\x01\n" +
 	"\x12GetProtocolRequest\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12>\n" +
-	"\rprotocol_type\x18\x02 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\"\xcd\x01\n" +
+	"\rprotocol_type\x18\x02 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\tR\aversion\"\xcd\x01\n" +
 	"\x13GetProtocolResponse\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12>\n" +
 	"\rprotocol_type\x18\x02 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12,\n" +
 	"\x05files\x18\x04 \x03(\v2\x16.registry.v1.ProtoFileR\x05files\x12\x1f\n" +
 	"\ventry_point\x18\x05 \x01(\tR\n" +
-	"entryPointJ\x04\b\x03\x10\x04\"\xf4\x01\n" +
+	"entryPointJ\x04\b\x03\x10\x04\"\x9d\x02\n" +
 	"\x17RegisterConsumerRequest\x12#\n" +
 	"\rconsumer_name\x18\x01 \x01(\tR\fconsumerName\x12\x1f\n" +
 	"\vserver_name\x18\x02 \x01(\tR\n" +
@@ -1092,17 +1358,19 @@ const file_registry_v1_registry_proto_rawDesc = "" +
 	"\rprotocol_type\x18\x03 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12,\n" +
 	"\x05files\x18\x05 \x03(\v2\x16.registry.v1.ProtoFileR\x05files\x12\x1f\n" +
 	"\ventry_point\x18\x06 \x01(\tR\n" +
-	"entryPointJ\x04\b\x04\x10\x05\"w\n" +
+	"entryPoint\x12'\n" +
+	"\x0fserver_versions\x18\a \x03(\tR\x0eserverVersionsJ\x04\b\x04\x10\x05\"w\n" +
 	"\x18RegisterConsumerResponse\x12#\n" +
 	"\rconsumer_name\x18\x01 \x01(\tR\fconsumerName\x12\x1f\n" +
 	"\vserver_name\x18\x02 \x01(\tR\n" +
 	"serverName\x12\x15\n" +
-	"\x06is_new\x18\x03 \x01(\bR\x05isNew\"\xa1\x01\n" +
+	"\x06is_new\x18\x03 \x01(\bR\x05isNew\"\xca\x01\n" +
 	"\x19UnregisterConsumerRequest\x12#\n" +
 	"\rconsumer_name\x18\x01 \x01(\tR\fconsumerName\x12\x1f\n" +
 	"\vserver_name\x18\x02 \x01(\tR\n" +
 	"serverName\x12>\n" +
-	"\rprotocol_type\x18\x03 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\"\x1c\n" +
+	"\rprotocol_type\x18\x03 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12'\n" +
+	"\x0fserver_versions\x18\x04 \x03(\tR\x0eserverVersions\"\x1c\n" +
 	"\x1aUnregisterConsumerResponse\"7\n" +
 	"\x12GetGrpcViewRequest\x12!\n" +
 	"\fservice_name\x18\x01 \x01(\tR\vserviceName\"r\n" +
@@ -1130,17 +1398,36 @@ const file_registry_v1_registry_proto_rawDesc = "" +
 	"\bservices\x18\x01 \x03(\v2\x18.registry.v1.ServiceInfoR\bservices\"1\n" +
 	"\vServiceInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name*E\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xf6\x01\n" +
+	"\x17ValidateProtocolRequest\x12!\n" +
+	"\fservice_name\x18\x01 \x01(\tR\vserviceName\x12>\n" +
+	"\rprotocol_type\x18\x02 \x01(\x0e2\x19.registry.v1.ProtocolTypeR\fprotocolType\x12,\n" +
+	"\x05files\x18\x03 \x03(\v2\x16.registry.v1.ProtoFileR\x05files\x12\x1f\n" +
+	"\ventry_point\x18\x04 \x01(\tR\n" +
+	"entryPoint\x12)\n" +
+	"\x10against_versions\x18\x05 \x03(\tR\x0fagainstVersions\"j\n" +
+	"\x10VersionViolation\x12\x18\n" +
+	"\aversion\x18\x01 \x01(\tR\aversion\x12<\n" +
+	"\tconsumers\x18\x02 \x03(\v2\x1e.registry.v1.ConsumerViolationR\tconsumers\"X\n" +
+	"\x11ConsumerViolation\x12#\n" +
+	"\rconsumer_name\x18\x01 \x01(\tR\fconsumerName\x12\x1e\n" +
+	"\n" +
+	"violations\x18\x02 \x03(\tR\n" +
+	"violations\"~\n" +
+	"\x18ValidateProtocolResponse\x12\x14\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid\x12L\n" +
+	"\x12version_violations\x18\x02 \x03(\v2\x1d.registry.v1.VersionViolationR\x11versionViolations*E\n" +
 	"\fProtocolType\x12\x1d\n" +
 	"\x19PROTOCOL_TYPE_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12PROTOCOL_TYPE_GRPC\x10\x012\xb1\x04\n" +
+	"\x12PROTOCOL_TYPE_GRPC\x10\x012\x92\x05\n" +
 	"\x10ProtocolRegistry\x12\\\n" +
 	"\x0fPublishProtocol\x12#.registry.v1.PublishProtocolRequest\x1a$.registry.v1.PublishProtocolResponse\x12P\n" +
 	"\vGetProtocol\x12\x1f.registry.v1.GetProtocolRequest\x1a .registry.v1.GetProtocolResponse\x12_\n" +
 	"\x10RegisterConsumer\x12$.registry.v1.RegisterConsumerRequest\x1a%.registry.v1.RegisterConsumerResponse\x12e\n" +
 	"\x12UnregisterConsumer\x12&.registry.v1.UnregisterConsumerRequest\x1a'.registry.v1.UnregisterConsumerResponse\x12P\n" +
 	"\vGetGrpcView\x12\x1f.registry.v1.GetGrpcViewRequest\x1a .registry.v1.GetGrpcViewResponse\x12S\n" +
-	"\fListServices\x12 .registry.v1.ListServicesRequest\x1a!.registry.v1.ListServicesResponseB\xaf\x01\n" +
+	"\fListServices\x12 .registry.v1.ListServicesRequest\x1a!.registry.v1.ListServicesResponse\x12_\n" +
+	"\x10ValidateProtocol\x12$.registry.v1.ValidateProtocolRequest\x1a%.registry.v1.ValidateProtocolResponseB\xaf\x01\n" +
 	"\x0fcom.registry.v1B\rRegistryProtoP\x01Z@github.com/user/protocol_registry/pkg/api/registry/v1;registryv1\xa2\x02\x03RXX\xaa\x02\vRegistry.V1\xca\x02\vRegistry\\V1\xe2\x02\x17Registry\\V1\\GPBMetadata\xea\x02\fRegistry::V1b\x06proto3"
 
 var (
@@ -1156,7 +1443,7 @@ func file_registry_v1_registry_proto_rawDescGZIP() []byte {
 }
 
 var file_registry_v1_registry_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_registry_v1_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_registry_v1_registry_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_registry_v1_registry_proto_goTypes = []any{
 	(ProtocolType)(0),                  // 0: registry.v1.ProtocolType
 	(*ProtoFile)(nil),                  // 1: registry.v1.ProtoFile
@@ -1177,6 +1464,10 @@ var file_registry_v1_registry_proto_goTypes = []any{
 	(*ListServicesRequest)(nil),        // 16: registry.v1.ListServicesRequest
 	(*ListServicesResponse)(nil),       // 17: registry.v1.ListServicesResponse
 	(*ServiceInfo)(nil),                // 18: registry.v1.ServiceInfo
+	(*ValidateProtocolRequest)(nil),    // 19: registry.v1.ValidateProtocolRequest
+	(*VersionViolation)(nil),           // 20: registry.v1.VersionViolation
+	(*ConsumerViolation)(nil),          // 21: registry.v1.ConsumerViolation
+	(*ValidateProtocolResponse)(nil),   // 22: registry.v1.ValidateProtocolResponse
 }
 var file_registry_v1_registry_proto_depIdxs = []int32{
 	0,  // 0: registry.v1.PublishProtocolRequest.protocol_type:type_name -> registry.v1.ProtocolType
@@ -1193,23 +1484,29 @@ var file_registry_v1_registry_proto_depIdxs = []int32{
 	14, // 11: registry.v1.GrpcMethodView.output:type_name -> registry.v1.GrpcMessageView
 	15, // 12: registry.v1.GrpcMessageView.fields:type_name -> registry.v1.GrpcFieldView
 	18, // 13: registry.v1.ListServicesResponse.services:type_name -> registry.v1.ServiceInfo
-	2,  // 14: registry.v1.ProtocolRegistry.PublishProtocol:input_type -> registry.v1.PublishProtocolRequest
-	4,  // 15: registry.v1.ProtocolRegistry.GetProtocol:input_type -> registry.v1.GetProtocolRequest
-	6,  // 16: registry.v1.ProtocolRegistry.RegisterConsumer:input_type -> registry.v1.RegisterConsumerRequest
-	8,  // 17: registry.v1.ProtocolRegistry.UnregisterConsumer:input_type -> registry.v1.UnregisterConsumerRequest
-	10, // 18: registry.v1.ProtocolRegistry.GetGrpcView:input_type -> registry.v1.GetGrpcViewRequest
-	16, // 19: registry.v1.ProtocolRegistry.ListServices:input_type -> registry.v1.ListServicesRequest
-	3,  // 20: registry.v1.ProtocolRegistry.PublishProtocol:output_type -> registry.v1.PublishProtocolResponse
-	5,  // 21: registry.v1.ProtocolRegistry.GetProtocol:output_type -> registry.v1.GetProtocolResponse
-	7,  // 22: registry.v1.ProtocolRegistry.RegisterConsumer:output_type -> registry.v1.RegisterConsumerResponse
-	9,  // 23: registry.v1.ProtocolRegistry.UnregisterConsumer:output_type -> registry.v1.UnregisterConsumerResponse
-	11, // 24: registry.v1.ProtocolRegistry.GetGrpcView:output_type -> registry.v1.GetGrpcViewResponse
-	17, // 25: registry.v1.ProtocolRegistry.ListServices:output_type -> registry.v1.ListServicesResponse
-	20, // [20:26] is the sub-list for method output_type
-	14, // [14:20] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	0,  // 14: registry.v1.ValidateProtocolRequest.protocol_type:type_name -> registry.v1.ProtocolType
+	1,  // 15: registry.v1.ValidateProtocolRequest.files:type_name -> registry.v1.ProtoFile
+	21, // 16: registry.v1.VersionViolation.consumers:type_name -> registry.v1.ConsumerViolation
+	20, // 17: registry.v1.ValidateProtocolResponse.version_violations:type_name -> registry.v1.VersionViolation
+	2,  // 18: registry.v1.ProtocolRegistry.PublishProtocol:input_type -> registry.v1.PublishProtocolRequest
+	4,  // 19: registry.v1.ProtocolRegistry.GetProtocol:input_type -> registry.v1.GetProtocolRequest
+	6,  // 20: registry.v1.ProtocolRegistry.RegisterConsumer:input_type -> registry.v1.RegisterConsumerRequest
+	8,  // 21: registry.v1.ProtocolRegistry.UnregisterConsumer:input_type -> registry.v1.UnregisterConsumerRequest
+	10, // 22: registry.v1.ProtocolRegistry.GetGrpcView:input_type -> registry.v1.GetGrpcViewRequest
+	16, // 23: registry.v1.ProtocolRegistry.ListServices:input_type -> registry.v1.ListServicesRequest
+	19, // 24: registry.v1.ProtocolRegistry.ValidateProtocol:input_type -> registry.v1.ValidateProtocolRequest
+	3,  // 25: registry.v1.ProtocolRegistry.PublishProtocol:output_type -> registry.v1.PublishProtocolResponse
+	5,  // 26: registry.v1.ProtocolRegistry.GetProtocol:output_type -> registry.v1.GetProtocolResponse
+	7,  // 27: registry.v1.ProtocolRegistry.RegisterConsumer:output_type -> registry.v1.RegisterConsumerResponse
+	9,  // 28: registry.v1.ProtocolRegistry.UnregisterConsumer:output_type -> registry.v1.UnregisterConsumerResponse
+	11, // 29: registry.v1.ProtocolRegistry.GetGrpcView:output_type -> registry.v1.GetGrpcViewResponse
+	17, // 30: registry.v1.ProtocolRegistry.ListServices:output_type -> registry.v1.ListServicesResponse
+	22, // 31: registry.v1.ProtocolRegistry.ValidateProtocol:output_type -> registry.v1.ValidateProtocolResponse
+	25, // [25:32] is the sub-list for method output_type
+	18, // [18:25] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_registry_v1_registry_proto_init() }
@@ -1223,7 +1520,7 @@ func file_registry_v1_registry_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_registry_v1_registry_proto_rawDesc), len(file_registry_v1_registry_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   18,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

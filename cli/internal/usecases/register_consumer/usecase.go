@@ -27,7 +27,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("collect proto files: %w", err)
 	}
 
-	output, err := uc.registryClient.RegisterConsumer(ctx, input.ConsumerName, input.ServerName, protocolType, files, input.EntryPoint)
+	output, err := uc.registryClient.RegisterConsumer(ctx, input.ConsumerName, input.ServerName, protocolType, files, input.EntryPoint, input.ServerVersions)
 	if err != nil {
 		return nil, fmt.Errorf("register: %w", err)
 	}

@@ -20,7 +20,12 @@ func New(registryClient RegistryClient) *UseCase {
 func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 	protocolType := entities.ParseProtocolType(input.ProtocolType)
 
-	output, err := uc.registryClient.GetProtocol(ctx, input.ServiceName, protocolType)
+	version := input.Version
+	if version == "" {
+		version = "default"
+	}
+
+	output, err := uc.registryClient.GetProtocol(ctx, input.ServiceName, protocolType, version)
 	if err != nil {
 		return nil, fmt.Errorf("get: %w", err)
 	}

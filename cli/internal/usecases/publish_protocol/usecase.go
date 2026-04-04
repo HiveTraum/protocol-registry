@@ -27,7 +27,7 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("collect proto files: %w", err)
 	}
 
-	output, err := uc.registryClient.PublishProtocol(ctx, input.ServiceName, protocolType, files, input.EntryPoint)
+	output, err := uc.registryClient.PublishProtocol(ctx, input.ServiceName, protocolType, files, input.EntryPoint, input.Versions)
 	if err != nil {
 		return nil, fmt.Errorf("publish: %w", err)
 	}

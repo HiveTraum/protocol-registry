@@ -44,6 +44,11 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("syntax validation failed: %w", err)
 	}
 
+	versions := input.Versions
+	if len(versions) == 0 {
+		versions = []string{"default"}
+	}
+
 	contentHash := input.FileSet.ContentHash()
 
 	svc, _, err := uc.serviceRepo.GetOrCreate(ctx, input.ServiceName)
@@ -51,39 +56,42 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) (*Output, error) {
 		return nil, fmt.Errorf("get or create service: %w", err)
 	}
 
-	existing, err := uc.protocolRepo.GetByServiceAndType(ctx, svc.ID, input.ProtocolType)
-	if err != nil {
-		return nil, fmt.Errorf("get existing protocol: %w", err)
-	}
+	anyNew := false
+	for _, version := range versions {
+		existing, err := uc.protocolRepo.GetByServiceAndType(ctx, svc.ID, input.ProtocolType, version)
+		if err != nil {
+			return nil, fmt.Errorf("get existing protocol (version %s): %w", version, err)
+		}
 
-	if existing != nil && existing.ContentHash == contentHash {
-		return &Output{
-			ServiceName: input.ServiceName,
-			IsNew:       false,
-		}, nil
-	}
+		if existing != nil && existing.ContentHash == contentHash {
+			continue
+		}
 
-	if err := uc.validateAgainstConsumers(ctx, svc.ID, input.ServiceName, input.ProtocolType, input.FileSet); err != nil {
-		return nil, err
-	}
+		if err := uc.validateAgainstConsumers(ctx, svc.ID, input.ServiceName, input.ProtocolType, version, input.FileSet); err != nil {
+			return nil, err
+		}
 
-	if err := uc.storage.UploadFileSet(ctx, input.ServiceName, input.ProtocolType, input.FileSet); err != nil {
-		return nil, fmt.Errorf("upload protocol: %w", err)
-	}
+		if err := uc.storage.UploadFileSet(ctx, input.ServiceName, version, input.ProtocolType, input.FileSet); err != nil {
+			return nil, fmt.Errorf("upload protocol (version %s): %w", version, err)
+		}
 
-	_, isNew, err := uc.protocolRepo.Upsert(ctx, svc.ID, input.ProtocolType, contentHash)
-	if err != nil {
-		return nil, fmt.Errorf("upsert protocol: %w", err)
+		_, isNew, err := uc.protocolRepo.Upsert(ctx, svc.ID, input.ProtocolType, version, contentHash)
+		if err != nil {
+			return nil, fmt.Errorf("upsert protocol (version %s): %w", version, err)
+		}
+		if isNew {
+			anyNew = true
+		}
 	}
 
 	return &Output{
 		ServiceName: input.ServiceName,
-		IsNew:       isNew,
+		IsNew:       anyNew,
 	}, nil
 }
 
-func (uc *UseCase) validateAgainstConsumers(ctx context.Context, serverServiceID uuid.UUID, serverName string, protocolType entities.ProtocolType, newFileSet entities.ProtoFileSet) error {
-	consumers, err := uc.consumerRepo.ListByServerAndType(ctx, serverServiceID, protocolType)
+func (uc *UseCase) validateAgainstConsumers(ctx context.Context, serverServiceID uuid.UUID, serverName string, protocolType entities.ProtocolType, version string, newFileSet entities.ProtoFileSet) error {
+	consumers, err := uc.consumerRepo.ListByServerAndType(ctx, serverServiceID, protocolType, version)
 	if err != nil {
 		return fmt.Errorf("list consumers: %w", err)
 	}
@@ -100,7 +108,7 @@ func (uc *UseCase) validateAgainstConsumers(ctx context.Context, serverServiceID
 			return fmt.Errorf("get consumer service: %w", err)
 		}
 
-		consumerFileSet, err := uc.consumerStorage.DownloadConsumerFileSet(ctx, consumerSvc.Name, serverName, protocolType)
+		consumerFileSet, err := uc.consumerStorage.DownloadConsumerFileSet(ctx, consumerSvc.Name, serverName, version, protocolType)
 		if err != nil {
 			return fmt.Errorf("download consumer proto for %q: %w", consumerSvc.Name, err)
 		}

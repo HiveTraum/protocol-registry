@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/user/protocol_registry/internal/config"
 	grpccontroller "github.com/user/protocol_registry/internal/controllers/grpc"
+	restcontroller "github.com/user/protocol_registry/internal/controllers/rest"
 	"github.com/user/protocol_registry/internal/implementations"
 	"github.com/user/protocol_registry/internal/usecases/get_grpc_view"
 	"github.com/user/protocol_registry/internal/usecases/get_protocol"
@@ -22,12 +24,14 @@ import (
 	"github.com/user/protocol_registry/internal/usecases/publish_protocol"
 	"github.com/user/protocol_registry/internal/usecases/register_consumer"
 	"github.com/user/protocol_registry/internal/usecases/unregister_consumer"
+	"github.com/user/protocol_registry/internal/usecases/validate_protocol"
 	registryv1 "github.com/user/protocol_registry/pkg/api/registry/v1"
 )
 
 type App struct {
 	cfg        *config.Config
 	grpcServer *grpc.Server
+	httpServer *http.Server
 	pool       *pgxpool.Pool
 }
 
@@ -71,14 +75,33 @@ func (a *App) Run(ctx context.Context) error {
 	unregisterUC := unregister_consumer.New(serviceRepo, consumerRepo, protocolStorage)
 	grpcViewUC := get_grpc_view.New(serviceRepo, protocolRepo, protocolStorage, consumerRepo, protocolStorage, protoInspector)
 	listServicesUC := list_services.New(serviceRepo)
+	validateUC := validate_protocol.New(serviceRepo, consumerRepo, protocolStorage, syntaxValidator, breakingChangesValidator)
 
-	// Controller
-	handler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC)
+	// gRPC controller
+	grpcHandler := grpccontroller.NewHandler(publishUC, getUC, registerUC, unregisterUC, grpcViewUC, listServicesUC, validateUC)
 
 	a.grpcServer = grpc.NewServer()
-	registryv1.RegisterProtocolRegistryServer(a.grpcServer, handler)
+	registryv1.RegisterProtocolRegistryServer(a.grpcServer, grpcHandler)
 	reflection.Register(a.grpcServer)
 
+	// REST controller
+	restHandler := restcontroller.NewHandler(listServicesUC, grpcViewUC)
+	httpHandler := restcontroller.NewHTTPServer(restHandler)
+
+	a.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", a.cfg.HTTPPort),
+		Handler: httpHandler,
+	}
+
+	// Start HTTP server
+	go func() {
+		log.Printf("HTTP server listening on :%d", a.cfg.HTTPPort)
+		if err := a.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Printf("HTTP server error: %v", err)
+		}
+	}()
+
+	// Start gRPC server (blocking)
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", a.cfg.GRPCPort))
 	if err != nil {
 		return fmt.Errorf("listen: %w", err)
@@ -89,6 +112,9 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) Shutdown() {
+	if a.httpServer != nil {
+		a.httpServer.Close()
+	}
 	if a.grpcServer != nil {
 		a.grpcServer.GracefulStop()
 	}

@@ -28,6 +28,11 @@ func New(
 }
 
 func (uc *UseCase) Execute(ctx context.Context, input Input) error {
+	versions := input.ServerVersions
+	if len(versions) == 0 {
+		versions = []string{"default"}
+	}
+
 	consumerSvc, err := uc.serviceRepo.GetByName(ctx, input.ConsumerName)
 	if err != nil {
 		return fmt.Errorf("get consumer service: %w", err)
@@ -44,15 +49,17 @@ func (uc *UseCase) Execute(ctx context.Context, input Input) error {
 		return entities.NewServiceNotFoundError(input.ServerName)
 	}
 
-	if err := uc.consumerRepo.Delete(ctx, consumerSvc.ID, serverSvc.ID, input.ProtocolType); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return entities.NewConsumerNotFoundError(input.ConsumerName, input.ServerName)
+	for _, version := range versions {
+		if err := uc.consumerRepo.Delete(ctx, consumerSvc.ID, serverSvc.ID, input.ProtocolType, version); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return entities.NewConsumerNotFoundError(input.ConsumerName, input.ServerName)
+			}
+			return fmt.Errorf("delete consumer (version %s): %w", version, err)
 		}
-		return fmt.Errorf("delete consumer: %w", err)
-	}
 
-	if err := uc.consumerStorage.DeleteConsumer(ctx, input.ConsumerName, input.ServerName, input.ProtocolType); err != nil {
-		return fmt.Errorf("delete consumer proto: %w", err)
+		if err := uc.consumerStorage.DeleteConsumer(ctx, input.ConsumerName, input.ServerName, version, input.ProtocolType); err != nil {
+			return fmt.Errorf("delete consumer proto (version %s): %w", version, err)
+		}
 	}
 
 	return nil

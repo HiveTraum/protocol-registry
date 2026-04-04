@@ -17,29 +17,29 @@ func NewConsumerRepositoryPostgres(pool *pgxpool.Pool) *ConsumerRepositoryPostgr
 	return &ConsumerRepositoryPostgres{pool: pool}
 }
 
-func (r *ConsumerRepositoryPostgres) Upsert(ctx context.Context, consumerServiceID, serverServiceID uuid.UUID, protocolType entities.ProtocolType, contentHash string) (*entities.Consumer, bool, error) {
+func (r *ConsumerRepositoryPostgres) Upsert(ctx context.Context, consumerServiceID, serverServiceID uuid.UUID, protocolType entities.ProtocolType, version string, contentHash string) (*entities.Consumer, bool, error) {
 	var c entities.Consumer
 	var created bool
 
 	err := r.pool.QueryRow(ctx,
-		`INSERT INTO consumers (consumer_service_id, server_service_id, protocol_type, content_hash)
-		 VALUES ($1, $2, $3, $4)
-		 ON CONFLICT (consumer_service_id, server_service_id, protocol_type)
+		`INSERT INTO consumers (consumer_service_id, server_service_id, protocol_type, version, content_hash)
+		 VALUES ($1, $2, $3, $4, $5)
+		 ON CONFLICT (consumer_service_id, server_service_id, protocol_type, version)
 		 DO UPDATE SET content_hash = EXCLUDED.content_hash, updated_at = NOW()
-		 RETURNING id, consumer_service_id, server_service_id, protocol_type, content_hash, updated_at, (xmax = 0) AS created`,
-		consumerServiceID, serverServiceID, protocolType, contentHash,
-	).Scan(&c.ID, &c.ConsumerServiceID, &c.ServerServiceID, &c.ProtocolType, &c.ContentHash, &c.UpdatedAt, &created)
+		 RETURNING id, consumer_service_id, server_service_id, protocol_type, version, content_hash, updated_at, (xmax = 0) AS created`,
+		consumerServiceID, serverServiceID, protocolType, version, contentHash,
+	).Scan(&c.ID, &c.ConsumerServiceID, &c.ServerServiceID, &c.ProtocolType, &c.Version, &c.ContentHash, &c.UpdatedAt, &created)
 	if err != nil {
 		return nil, false, err
 	}
 	return &c, created, nil
 }
 
-func (r *ConsumerRepositoryPostgres) Delete(ctx context.Context, consumerServiceID, serverServiceID uuid.UUID, protocolType entities.ProtocolType) error {
+func (r *ConsumerRepositoryPostgres) Delete(ctx context.Context, consumerServiceID, serverServiceID uuid.UUID, protocolType entities.ProtocolType, version string) error {
 	result, err := r.pool.Exec(ctx,
 		`DELETE FROM consumers
-		 WHERE consumer_service_id = $1 AND server_service_id = $2 AND protocol_type = $3`,
-		consumerServiceID, serverServiceID, protocolType,
+		 WHERE consumer_service_id = $1 AND server_service_id = $2 AND protocol_type = $3 AND version = $4`,
+		consumerServiceID, serverServiceID, protocolType, version,
 	)
 	if err != nil {
 		return err
@@ -50,12 +50,12 @@ func (r *ConsumerRepositoryPostgres) Delete(ctx context.Context, consumerService
 	return nil
 }
 
-func (r *ConsumerRepositoryPostgres) ListByServerAndType(ctx context.Context, serverServiceID uuid.UUID, protocolType entities.ProtocolType) ([]entities.Consumer, error) {
+func (r *ConsumerRepositoryPostgres) ListByServerAndType(ctx context.Context, serverServiceID uuid.UUID, protocolType entities.ProtocolType, version string) ([]entities.Consumer, error) {
 	rows, err := r.pool.Query(ctx,
-		`SELECT id, consumer_service_id, server_service_id, protocol_type, content_hash, updated_at
+		`SELECT id, consumer_service_id, server_service_id, protocol_type, version, content_hash, updated_at
 		 FROM consumers
-		 WHERE server_service_id = $1 AND protocol_type = $2`,
-		serverServiceID, protocolType,
+		 WHERE server_service_id = $1 AND protocol_type = $2 AND version = $3`,
+		serverServiceID, protocolType, version,
 	)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (r *ConsumerRepositoryPostgres) ListByServerAndType(ctx context.Context, se
 	var consumers []entities.Consumer
 	for rows.Next() {
 		var c entities.Consumer
-		if err := rows.Scan(&c.ID, &c.ConsumerServiceID, &c.ServerServiceID, &c.ProtocolType, &c.ContentHash, &c.UpdatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.ConsumerServiceID, &c.ServerServiceID, &c.ProtocolType, &c.Version, &c.ContentHash, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		consumers = append(consumers, c)
